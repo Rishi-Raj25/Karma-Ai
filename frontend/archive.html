@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KARMA — Intelligence Archive</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36'%3E%3Ccircle cx='18' cy='18' r='16' stroke='%23C4F82A' stroke-width='2.5' stroke-dasharray='4 3' fill='none'/%3E%3Cpath d='M18 6V18L26 26' stroke='%23C4F82A' stroke-width='2.5' stroke-linecap='round' fill='none'/%3E%3Ccircle cx='18' cy='18' r='3' fill='%23C4F82A'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <link rel="stylesheet" href="dashboard.css" />
+  <style>
+    .archive-body { padding:24px; overflow-y:auto; height:calc(100% - 60px); display:flex; flex-direction:column; gap:20px; }
+    .archive-stats { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    .astat { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:20px; }
+    .astat-label { font-size:10px; font-weight:600; letter-spacing:1.5px; color:var(--text-dim); text-transform:uppercase; margin-bottom:8px; }
+    .astat-val { font-family:var(--font-mono); font-size:28px; font-weight:700; color:var(--text); }
+    .archive-list { display:flex; flex-direction:column; gap:10px; }
+    .archive-item { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; transition:border-color 0.2s; }
+    .archive-item:hover { border-color:var(--border-accent); }
+    .archive-item-header { display:flex; align-items:center; gap:16px; padding:16px 20px; cursor:pointer; }
+    .archive-id { font-family:var(--font-mono); font-size:11px; font-weight:700; color:var(--accent); background:var(--accent-dim); border:1px solid var(--border-accent); padding:3px 8px; border-radius:4px; white-space:nowrap; }
+    .archive-info { flex:1; min-width:0; }
+    .archive-name { font-size:14px; font-weight:600; margin-bottom:2px; }
+    .archive-date { font-size:11px; color:var(--text-dim); }
+    .archive-dur { text-align:center; min-width:80px; }
+    .archive-dur-label { font-size:9px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; margin-bottom:2px; }
+    .archive-dur-val { font-family:var(--font-mono); font-size:13px; font-weight:700; }
+    .archive-status { padding:4px 12px; border-radius:4px; font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; white-space:nowrap; }
+    .archive-status.intercepted { background:rgba(61,220,132,0.1); color:var(--accent); border:1px solid var(--border-accent); }
+    .archive-status.blocked { background:rgba(88,166,255,0.1); color:#58a6ff; border:1px solid rgba(88,166,255,0.3); }
+    .archive-status.intel { background:rgba(227,179,65,0.1); color:var(--orange); border:1px solid rgba(227,179,65,0.3); }
+    .archive-status.discarded { background:rgba(255,255,255,0.04); color:var(--text-dim); border:1px solid var(--border); }
+    .archive-chevron { color:var(--text-dim); transition:transform 0.3s; flex-shrink:0; }
+    .archive-item.open .archive-chevron { transform:rotate(180deg); }
+    .archive-item-body { display:none; padding:0 20px 20px; border-top:1px solid var(--border); margin-top:0; }
+    .archive-item.open .archive-item-body { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+    .section-tag { font-size:10px; font-weight:700; letter-spacing:1.5px; color:var(--accent); text-transform:uppercase; margin-bottom:12px; display:flex; align-items:center; gap:6px; }
+    .summary-text { font-size:13px; color:var(--text-dim); line-height:1.7; }
+    .timeline-items { display:flex; flex-direction:column; gap:8px; }
+    .timeline-item { display:flex; gap:12px; font-size:12px; }
+    .timeline-time { font-family:var(--font-mono); color:var(--text-dim); min-width:36px; }
+    .timeline-quote { padding:6px 12px; border-radius:4px; flex:1; }
+    .timeline-quote.scammer { background:rgba(248,81,73,0.08); border-left:2px solid var(--red); color:var(--text); font-style:italic; }
+    .timeline-quote.ai { background:rgba(61,220,132,0.08); border-left:2px solid var(--accent); color:var(--text); }
+    .extracted-grid { display:flex; flex-direction:column; gap:8px; margin-top:8px; }
+    .ext-row { display:flex; justify-content:space-between; font-size:12px; padding:6px 10px; border-radius:6px; background:var(--bg-elevated); }
+    .ext-key { color:var(--text-dim); }
+    .ext-val { font-family:var(--font-mono); color:var(--accent); font-weight:600; }
+    .replay-btn { width:100%; padding:12px; background:var(--accent); color:#0d1117; font-weight:700; font-size:13px; border-radius:var(--radius-sm); border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; transition:all 0.2s; margin-top:16px; grid-column:1/-1; }
+    .replay-btn:hover { transform:translateY(-1px); box-shadow:0 6px 20px var(--accent-glow); }
+    .archive-waveform { display:flex; align-items:center; gap:3px; margin-bottom:16px; }
+    .archive-waveform span { display:inline-block; border-radius:3px; background:var(--accent); }
+    .archive-waveform span:nth-child(odd) { width:10px; height:24px; opacity:0.5; }
+    .archive-waveform span:nth-child(even) { width:10px; height:36px; }
+    .archive-waveform span:nth-child(3) { height:48px; opacity:0.9; }
+    .archive-waveform span:nth-child(5) { height:36px; }
+    .archive-waveform span:nth-child(7) { height:20px; opacity:0.4; }
+    .gen-random-btn {
+      display:flex; align-items:center; gap:8px;
+      padding:10px 18px;
+      background:var(--bg-elevated); border:1px solid var(--border-accent);
+      border-radius:var(--radius-sm); color:var(--accent);
+      font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap;
+      transition:all 0.2s; font-family:var(--font-body);
+    }
+    .gen-random-btn:hover { background:var(--accent-dim); }
+    .gen-random-note { font-size:10px; color:var(--text-muted); font-weight:400; }
+
+    /* Replay Modal */
+    .replay-overlay {
+      position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:1000;
+      display:none; align-items:center; justify-content:center;
+      backdrop-filter:blur(6px); padding:20px;
+    }
+    .replay-overlay.open { display:flex; }
+    .replay-modal {
+      background:var(--bg-card); border:1px solid var(--border-accent);
+      border-radius:16px; width:100%; max-width:600px;
+      max-height:80vh; display:flex; flex-direction:column; overflow:hidden;
+      box-shadow:0 0 60px rgba(61,220,132,0.15);
+      animation: modalSlideIn 0.3s ease;
+    }
+    @keyframes modalSlideIn { from{transform:translateY(20px);opacity:0;} to{transform:translateY(0);opacity:1;} }
+    .replay-modal-head {
+      padding:18px 24px; border-bottom:1px solid var(--border);
+      display:flex; align-items:center; justify-content:space-between; flex-shrink:0;
+    }
+    .replay-modal-title { font-family:var(--font-display); font-size:15px; font-weight:700; display:flex; gap:10px; align-items:center; }
+    .replay-close-btn {
+      width:30px; height:30px; border-radius:6px; background:var(--bg-elevated);
+      border:1px solid var(--border); display:flex; align-items:center; justify-content:center;
+      cursor:pointer; color:var(--text-dim); transition:all 0.2s;
+    }
+    .replay-close-btn:hover { border-color:var(--red); color:var(--red); }
+    .replay-backend-note {
+      margin:14px 24px 0; padding:10px 14px;
+      background:rgba(227,179,65,0.08); border:1px solid rgba(227,179,65,0.25);
+      border-radius:8px; font-size:11px; color:var(--orange);
+      display:flex; gap:8px; align-items:flex-start;
+    }
+    .replay-progress-wrap { padding:14px 24px 4px; flex-shrink:0; }
+    .replay-progress-bar {
+      height:3px; background:var(--bg-elevated); border-radius:3px; overflow:hidden;
+    }
+    .replay-progress-fill {
+      height:100%; width:0%; background:var(--accent);
+      border-radius:3px; box-shadow:0 0 8px var(--accent-glow);
+      transition:width 0.4s linear;
+    }
+    .replay-progress-label { display:flex; justify-content:space-between; font-size:10px; color:var(--text-muted); margin-top:6px; font-family:var(--font-mono); }
+    .replay-feed {
+      flex:1; overflow-y:auto; padding:16px 24px;
+      display:flex; flex-direction:column; gap:12px;
+    }
+    .replay-feed::-webkit-scrollbar{width:4px;}
+    .replay-feed::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+    .rmsg { display:flex; gap:10px; opacity:0; transform:translateY(6px); transition:all 0.35s ease; }
+    .rmsg.show { opacity:1; transform:translateY(0); }
+    .rmsg-label { font-size:9px; font-weight:700; letter-spacing:1px; white-space:nowrap; padding-top:3px; min-width:70px; }
+    .rmsg-label.sc { color:var(--red); }
+    .rmsg-label.ai { color:var(--accent); }
+    .rmsg-bubble { padding:9px 14px; border-radius:10px; font-size:12.5px; line-height:1.6; flex:1; }
+    .rmsg.sc .rmsg-bubble { background:rgba(248,81,73,0.07); border:1px solid rgba(248,81,73,0.15); }
+    .rmsg.ai .rmsg-bubble { background:rgba(61,220,132,0.07); border:1px solid rgba(61,220,132,0.2); }
+    .rmsg-timestamp { font-size:10px; color:var(--text-muted); font-family:var(--font-mono); white-space:nowrap; padding-top:3px; }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">
+        <svg width="22" height="22" viewBox="0 0 36 36" fill="none"><circle cx="18" cy="18" r="16" stroke="currentColor" stroke-width="2.5" stroke-dasharray="4 3"/><path d="M18 6V18L26 26" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><circle cx="18" cy="18" r="3" fill="currentColor"/></svg>
+      </div>
+      <div><div class="brand-name">KARMA <span style="color:var(--accent)">AI</span></div><div class="brand-sub">INTERCEPT SYSTEM</div></div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="live-calls.html" class="nav-item"><i data-lucide="radio" class="nav-icon"></i><span>Live Intercept</span></a>
+      <a href="analytics.html" class="nav-item"><i data-lucide="bar-chart-2" class="nav-icon"></i><span>Analytics</span></a>
+      <a href="archive.html" class="nav-item active"><i data-lucide="archive" class="nav-icon"></i><span>Intelligence Archive</span></a>
+    </nav>
+  </aside>
+  <div class="main-area">
+    <header class="top-bar">
+      <div class="top-bar-left">
+        <h2 style="font-family:var(--font-display);font-size:16px;font-weight:700;">Archive Explorer</h2>
+        <div class="search-bar" style="max-width:300px;">
+          <i data-lucide="search" style="width:14px;height:14px;color:var(--text-dim)"></i>
+          <input type="text" placeholder="Search intercepts by ID, keyword..."/>
+        </div>
+      </div>
+      <div class="top-bar-right">
+        <button class="nav-icon-btn"><i data-lucide="bell" style="width:15px;height:15px"></i></button>
+        <div class="user-chip"><div class="user-avatar">G</div><div><div style="font-size:12px;font-weight:600;">Guardian</div></div></div>
+      </div>
+    </header>
+    <div class="archive-body">
+      <!-- Stats + Actions -->
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+        <div class="archive-stats" style="flex:1;">
+          <div class="astat"><div class="astat-label">Total Intercepts</div><div class="astat-val" id="totalVal">0</div></div>
+          <div class="astat"><div class="astat-label">Est. Losses Saved</div><div class="astat-val" id="savingsVal">$0</div></div>
+        </div>
+        <button class="gen-random-btn" id="genRandomBtn">
+          <i data-lucide="shuffle" style="width:14px;height:14px"></i>
+          Generate Random
+          <span class="gen-random-note">(resets on backend connect)</span>
+        </button>
+      </div>
+
+      <!-- Archive List -->
+      <div class="archive-list">
+
+        <!-- Item 1 — expanded -->
+        <div class="archive-item open" id="item-8802">
+          <div class="archive-item-header" onclick="toggleItem('item-8802')">
+            <div class="archive-id">#SC-8802</div>
+            <div class="archive-info">
+              <div class="archive-name">Tech Support Scam</div>
+              <div class="archive-date">Detected: 2023-11-24 14:22:10</div>
+            </div>
+            <div class="archive-dur"><div class="archive-dur-label">DURATION</div><div class="archive-dur-val">12m 45s</div></div>
+            <div class="archive-status intercepted">INTERCEPTED</div>
+            <i data-lucide="chevron-up" class="archive-chevron" style="width:16px;height:16px"></i>
+          </div>
+          <div class="archive-item-body">
+            <div>
+              <div class="section-tag"><i data-lucide="file-text" style="width:12px;height:12px"></i> AUTO-SUMMARY</div>
+              <p class="summary-text">Subject impersonating "Microsoft Support Agent" attempted to gain remote access using TeamViewer. Interceptor deployed a virtual sandbox. After 10 minutes of failed command execution, subject became agitated and terminated the session.</p>
+              <div class="section-tag" style="margin-top:20px;"><i data-lucide="key" style="width:12px;height:12px"></i> EXTRACTED INTELLIGENCE</div>
+              <div class="extracted-grid">
+                <div class="ext-row"><span class="ext-key">Origin IP</span><span class="ext-val">103.24.188.42</span></div>
+                <div class="ext-row"><span class="ext-key">Phone Extracted</span><span class="ext-val">+91 9845 2210</span></div>
+              </div>
+            </div>
+            <div>
+              <div class="section-tag"><i data-lucide="activity" style="width:12px;height:12px"></i> ACTIVITY TIMELINE</div>
+              <div class="archive-waveform">
+                <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+              </div>
+              <div class="timeline-items">
+                <div class="timeline-item">
+                  <span class="timeline-time">00:12</span>
+                  <div class="timeline-quote scammer">"Hello this is Mark from Windows Security Department, how are you today?"</div>
+                </div>
+                <div class="timeline-item">
+                  <span class="timeline-time">04:38</span>
+                  <div class="timeline-quote ai">AI Agent successfully mirrors frustration; redirects to "Fake Log" tool.</div>
+                </div>
+                <div class="timeline-item">
+                  <span class="timeline-time">11:45</span>
+                  <div class="timeline-quote scammer">"Why is this not connecting?! Listen to me you must open the cmd..."</div>
+                </div>
+              </div>
+            </div>
+            <button class="replay-btn"><i data-lucide="play" style="width:15px;height:15px"></i> Replay Interception</button>
+          </div>
+        </div>
+
+        <!-- Item 2 -->
+        <div class="archive-item" id="item-8795">
+          <div class="archive-item-header" onclick="toggleItem('item-8795')">
+            <div class="archive-id">#SC-8795</div>
+            <div class="archive-info"><div class="archive-name">Crypto Wallet Impersonation</div><div class="archive-date">Detected: 2023-11-24 10:05:01</div></div>
+            <div class="archive-dur"><div class="archive-dur-label">DURATION</div><div class="archive-dur-val">05m 12s</div></div>
+            <div class="archive-status blocked">BLOCKED</div>
+            <i data-lucide="chevron-down" class="archive-chevron" style="width:16px;height:16px"></i>
+          </div>
+          <div class="archive-item-body">
+            <div>
+              <div class="section-tag"><i data-lucide="file-text" style="width:12px;height:12px"></i> AUTO-SUMMARY</div>
+              <p class="summary-text">Subject claimed to be a Coinbase security agent alerting on suspicious wallet activity. AI persona stalled with seed phrase confusion, causing subject to abandon call after 5 minutes.</p>
+              <div class="section-tag" style="margin-top:16px;"><i data-lucide="key" style="width:12px;height:12px"></i> EXTRACTED INTELLIGENCE</div>
+              <div class="extracted-grid">
+                <div class="ext-row"><span class="ext-key">Spoofed Number</span><span class="ext-val">+1 800-642-2220</span></div>
+                <div class="ext-row"><span class="ext-key">VoIP Provider</span><span class="ext-val">Twilio routed</span></div>
+              </div>
+            </div>
+            <div>
+              <div class="section-tag"><i data-lucide="activity" style="width:12px;height:12px"></i> ACTIVITY TIMELINE</div>
+              <div class="timeline-items">
+                <div class="timeline-item"><span class="timeline-time">00:05</span><div class="timeline-quote scammer">"Your wallet has been flagged for unauthorized transactions..."</div></div>
+                <div class="timeline-item"><span class="timeline-time">02:10</span><div class="timeline-quote ai">AI asks for seed phrase spelling aloud — one word at a time.</div></div>
+                <div class="timeline-item"><span class="timeline-time">05:01</span><div class="timeline-quote scammer">"Forget it!" — Call terminated by scammer.</div></div>
+              </div>
+            </div>
+            <button class="replay-btn"><i data-lucide="play" style="width:15px;height:15px"></i> Replay Interception</button>
+          </div>
+        </div>
+
+        <!-- Item 3 -->
+        <div class="archive-item" id="item-8790">
+          <div class="archive-item-header" onclick="toggleItem('item-8790')">
+            <div class="archive-id">#SC-8790</div>
+            <div class="archive-info"><div class="archive-name">Amazon Refund Scam</div><div class="archive-date">Detected: 2023-11-23 21:55:12</div></div>
+            <div class="archive-dur"><div class="archive-dur-label">DURATION</div><div class="archive-dur-val">22m 10s</div></div>
+            <div class="archive-status intel">INTEL GATHERED</div>
+            <i data-lucide="chevron-down" class="archive-chevron" style="width:16px;height:16px"></i>
+          </div>
+          <div class="archive-item-body">
+            <div>
+              <div class="section-tag"><i data-lucide="file-text" style="width:12px;height:12px"></i> AUTO-SUMMARY</div>
+              <p class="summary-text">Subject claimed victim owes $400 Amazon refund that was incorrectly sent. AI persona held scammer occupied for 22 minutes while intelligence on the refund call center was extracted.</p>
+            </div>
+            <div>
+              <div class="section-tag"><i data-lucide="key" style="width:12px;height:12px"></i> EXTRACTED INTELLIGENCE</div>
+              <div class="extracted-grid">
+                <div class="ext-row"><span class="ext-key">Call Center IP</span><span class="ext-val">103.86.2.19</span></div>
+                <div class="ext-row"><span class="ext-key">Team Size Est.</span><span class="ext-val">8–12 agents</span></div>
+                <div class="ext-row"><span class="ext-key">Location</span><span class="ext-val">Noida, India</span></div>
+              </div>
+            </div>
+            <button class="replay-btn"><i data-lucide="play" style="width:15px;height:15px"></i> Replay Interception</button>
+          </div>
+        </div>
+
+        <!-- Item 4 -->
+        <div class="archive-item" id="item-8788">
+          <div class="archive-item-header" onclick="toggleItem('item-8788')">
+            <div class="archive-id">#SC-8788</div>
+            <div class="archive-info"><div class="archive-name">IRS Agent Impersonation</div><div class="archive-date">Detected: 2023-11-23 18:30:45</div></div>
+            <div class="archive-dur"><div class="archive-dur-label">DURATION</div><div class="archive-dur-val">03m 45s</div></div>
+            <div class="archive-status discarded">DISCARDED</div>
+            <i data-lucide="chevron-down" class="archive-chevron" style="width:16px;height:16px"></i>
+          </div>
+          <div class="archive-item-body">
+            <div>
+              <div class="section-tag"><i data-lucide="file-text" style="width:12px;height:12px"></i> AUTO-SUMMARY</div>
+              <p class="summary-text">Scammer demanded gift cards for IRS debt. Weak social engineering; AI persona immediately stonewalled with questions about official IRS mailing address. Scammer escalated and disconnected at 3m 45s.</p>
+            </div>
+            <div>
+              <div class="section-tag"><i data-lucide="key" style="width:12px;height:12px"></i> NOTES</div>
+              <div class="extracted-grid">
+                <div class="ext-row"><span class="ext-key">Threat Level</span><span class="ext-val" style="color:var(--text-dim);">Low</span></div>
+                <div class="ext-row"><span class="ext-key">Intel Value</span><span class="ext-val" style="color:var(--text-dim);">Minimal</span></div>
+              </div>
+            </div>
+            <button class="replay-btn"><i data-lucide="play" style="width:15px;height:15px"></i> Replay Interception</button>
+          </div>
+        </div>
+
+        <!-- Item 5 -->
+        <div class="archive-item" id="item-8785">
+          <div class="archive-item-header" onclick="toggleItem('item-8785')">
+            <div class="archive-id">#SC-8785</div>
+            <div class="archive-info"><div class="archive-name">Bank KYC Phishing</div><div class="archive-date">Detected: 2023-11-23 15:44:02</div></div>
+            <div class="archive-dur"><div class="archive-dur-label">DURATION</div><div class="archive-dur-val">18m 30s</div></div>
+            <div class="archive-status intercepted">INTERCEPTED</div>
+            <i data-lucide="chevron-down" class="archive-chevron" style="width:16px;height:16px"></i>
+          </div>
+          <div class="archive-item-body">
+            <div>
+              <div class="section-tag"><i data-lucide="file-text" style="width:12px;height:12px"></i> AUTO-SUMMARY</div>
+              <p class="summary-text">Caller posed as SBI KYC officer, requesting Aadhaar and OTP to prevent account freeze. AI persona asked for "official branch code" repeatedly, stalling for 18 minutes before subject ended call.</p>
+              <div class="section-tag" style="margin-top:16px;"><i data-lucide="key" style="width:12px;height:12px"></i> EXTRACTED INTELLIGENCE</div>
+              <div class="extracted-grid">
+                <div class="ext-row"><span class="ext-key">IMEI Leaked</span><span class="ext-val">35-209900-176800-5</span></div>
+                <div class="ext-row"><span class="ext-key">Spoofed Number</span><span class="ext-val">+91 1800-XXX-0012</span></div>
+              </div>
+            </div>
+            <div>
+              <div class="section-tag"><i data-lucide="activity" style="width:12px;height:12px"></i> ACTIVITY TIMELINE</div>
+              <div class="timeline-items">
+                <div class="timeline-item"><span class="timeline-time">00:08</span><div class="timeline-quote scammer">"Your KYC is expired. Your account will be blocked in 2 hours..."</div></div>
+                <div class="timeline-item"><span class="timeline-time">06:20</span><div class="timeline-quote ai">AI requests official SBI branch code — scammer evades, AI loops question.</div></div>
+                <div class="timeline-item"><span class="timeline-time">17:45</span><div class="timeline-quote scammer">"Just give me the OTP! Why are you asking so many questions?!"</div></div>
+              </div>
+            </div>
+            <button class="replay-btn"><i data-lucide="play" style="width:15px;height:15px"></i> Replay Interception</button>
+          </div>
+        </div>
+
+        <!-- Item 6 -->
+        <div class="archive-item" id="item-8782">
+          <div class="archive-item-header" onclick="toggleItem('item-8782')">
+            <div class="archive-id">#SC-8782</div>
+            <div class="archive-info"><div class="archive-name">FedEx Parcel Arrest Threat</div><div class="archive-date">Detected: 2023-11-23 12:10:55</div></div>
+            <div class="archive-dur"><div class="archive-dur-label">DURATION</div><div class="archive-dur-val">09m 18s</div></div>
+            <div class="archive-status intel">INTEL GATHERED</div>
+            <i data-lucide="chevron-down" class="archive-chevron" style="width:16px;height:16px"></i>
+          </div>
+          <div class="archive-item-body">
+            <div>
+              <div class="section-tag"><i data-lucide="file-text" style="width:12px;height:12px"></i> AUTO-SUMMARY</div>
+              <p class="summary-text">Caller claimed a FedEx parcel in the victim's name contained drugs bound for Mexico. Threatened police arrest unless a ₹25,000 clearance fee was paid. AI stalled, collecting origin routing data.</p>
+            </div>
+            <div>
+              <div class="section-tag"><i data-lucide="key" style="width:12px;height:12px"></i> EXTRACTED INTELLIGENCE</div>
+              <div class="extracted-grid">
+                <div class="ext-row"><span class="ext-key">Origin IP</span><span class="ext-val">104.21.66.14</span></div>
+                <div class="ext-row"><span class="ext-key">Accent Profile</span><span class="ext-val">North India / Haryana</span></div>
+                <div class="ext-row"><span class="ext-key">Script Pattern</span><span class="ext-val">Courier-Arrest#7</span></div>
+              </div>
+            </div>
+            <button class="replay-btn"><i data-lucide="play" style="width:15px;height:15px"></i> Replay Interception</button>
+          </div>
+        </div>
+
+        <!-- Item 7 -->
+        <div class="archive-item" id="item-8779">
+          <div class="archive-item-header" onclick="toggleItem('item-8779')">
+            <div class="archive-id">#SC-8779</div>
+            <div class="archive-info"><div class="archive-name">Electricity Disconnection Scam</div><div class="archive-date">Detected: 2023-11-22 20:05:30</div></div>
+            <div class="archive-dur"><div class="archive-dur-label">DURATION</div><div class="archive-dur-val">31m 02s</div></div>
+            <div class="archive-status intercepted">INTERCEPTED</div>
+            <i data-lucide="chevron-down" class="archive-chevron" style="width:16px;height:16px"></i>
+          </div>
+          <div class="archive-item-body">
+            <div>
+              <div class="section-tag"><i data-lucide="file-text" style="width:12px;height:12px"></i> AUTO-SUMMARY</div>
+              <p class="summary-text">Subject threatened electricity disconnection in 30 minutes unless ₹8,920 was paid immediately. AI persona played confused elderly user unable to find electricity bill, holding scammer for 31 minutes.</p>
+              <div class="section-tag" style="margin-top:16px;"><i data-lucide="key" style="width:12px;height:12px"></i> EXTRACTED INTELLIGENCE</div>
+              <div class="extracted-grid">
+                <div class="ext-row"><span class="ext-key">Callback Number</span><span class="ext-val">+91 9934 XXX 221</span></div>
+                <div class="ext-row"><span class="ext-key">IVR Platform</span><span class="ext-val">Exotel spoofed</span></div>
+              </div>
+            </div>
+            <div>
+              <div class="section-tag"><i data-lucide="activity" style="width:12px;height:12px"></i> ACTIVITY TIMELINE</div>
+              <div class="timeline-items">
+                <div class="timeline-item"><span class="timeline-time">00:20</span><div class="timeline-quote scammer">"Your electricity will be cut in 30 minutes! Pay ₹8,920 now!"</div></div>
+                <div class="timeline-item"><span class="timeline-time">12:00</span><div class="timeline-quote ai">AI requests Consumer ID — searches "slowly" through documents for 8 minutes.</div></div>
+                <div class="timeline-item"><span class="timeline-time">30:40</span><div class="timeline-quote scammer">"MADAM the time is up! Just pay NOW!" — AI: "Oh beta the lights are still on..."</div></div>
+              </div>
+            </div>
+            <button class="replay-btn"><i data-lucide="play" style="width:15px;height:15px"></i> Replay Interception</button>
+          </div>
+        </div>
+
+        <!-- Item 8 -->
+        <div class="archive-item" id="item-8775">
+          <div class="archive-item-header" onclick="toggleItem('item-8775')">
+            <div class="archive-id">#SC-8775</div>
+            <div class="archive-info"><div class="archive-name">Job Offer Money Mule</div><div class="archive-date">Detected: 2023-11-22 14:30:10</div></div>
+            <div class="archive-dur"><div class="archive-dur-label">DURATION</div><div class="archive-dur-val">07m 55s</div></div>
+            <div class="archive-status discarded">DISCARDED</div>
+            <i data-lucide="chevron-down" class="archive-chevron" style="width:16px;height:16px"></i>
+          </div>
+          <div class="archive-item-body">
+            <div>
+              <div class="section-tag"><i data-lucide="file-text" style="width:12px;height:12px"></i> AUTO-SUMMARY</div>
+              <p class="summary-text">Caller offered a ₹50,000/month remote job requiring a ₹2,000 "registration fee". Low-effort script detected. AI persona asked for GST invoice from the company — caller disconnected within 8 minutes.</p>
+            </div>
+            <div>
+              <div class="section-tag"><i data-lucide="key" style="width:12px;height:12px"></i> NOTES</div>
+              <div class="extracted-grid">
+                <div class="ext-row"><span class="ext-key">Threat Level</span><span class="ext-val" style="color:var(--text-dim);">Low</span></div>
+                <div class="ext-row"><span class="ext-key">Script Pattern</span><span class="ext-val" style="color:var(--text-dim);">Job-Mule#3</span></div>
+              </div>
+            </div>
+            <button class="replay-btn"><i data-lucide="play" style="width:15px;height:15px"></i> Replay Interception</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Replay Modal -->
+<div class="replay-overlay" id="replayOverlay">
+  <div class="replay-modal">
+    <div class="replay-modal-head">
+      <div class="replay-modal-title">
+        <i data-lucide="play-circle" style="width:18px;height:18px;color:var(--accent)"></i>
+        <span id="replayTitle">Replay Interception</span>
+      </div>
+      <button class="replay-close-btn" id="replayCloseBtn">
+        <i data-lucide="x" style="width:14px;height:14px"></i>
+      </button>
+    </div>
+    <div class="replay-backend-note">
+      <i data-lucide="info" style="width:14px;height:14px;flex-shrink:0;margin-top:1px"></i>
+      <span>Showing <strong>simulated demo transcript</strong>. After backend is connected, real call recordings and transcripts will load here automatically.</span>
+    </div>
+    <div class="replay-progress-wrap">
+      <div class="replay-progress-bar"><div class="replay-progress-fill" id="replayFill"></div></div>
+      <div class="replay-progress-label"><span id="replayElapsed">00:00</span><span id="replayTotal">--:--</span></div>
+    </div>
+    <div class="replay-feed" id="replayFeed"></div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  lucide.createIcons();
+
+  function toggleItem(id) {
+    const el = document.getElementById(id);
+    el.classList.toggle('open');
+    const chev = el.querySelector('.archive-chevron');
+    chev.setAttribute('data-lucide', el.classList.contains('open') ? 'chevron-up' : 'chevron-down');
+    lucide.createIcons();
+  }
+  window.toggleItem = toggleItem;
+
+  function animateCount(el, target, prefix='', suffix='', duration=1500) {
+    let start=0; const step=target/(duration/16);
+    const int=setInterval(()=>{ start=Math.min(start+step,target); el.textContent=prefix+Math.round(start).toLocaleString()+suffix; if(start>=target) clearInterval(int); },16);
+  }
+  const BACKEND_URL = window.location.origin;
+
+  // Try to load real archive data from backend API
+  fetch(BACKEND_URL + '/api/calls?limit=50')
+    .then(r => r.json())
+    .then(resp => {
+      const calls = resp.calls || [];
+      if (calls.length > 0) {
+        const totalDuration = calls.reduce((sum, c) => sum + (c.duration_seconds || 0), 0);
+        const estSaved = calls.length * 5000;
+        setTimeout(() => {
+          animateCount(document.getElementById('totalVal'), resp.total || calls.length);
+          animateCount(document.getElementById('savingsVal'), estSaved, '₹');
+        }, 300);
+
+        const list = document.querySelector('.archive-list');
+        calls.forEach((call, idx) => {
+          const itemId = 'real-' + (call.id || idx);
+          const div = document.createElement('div');
+          div.className = 'archive-item';
+          div.id = itemId;
+
+          // Format duration
+          const durSec = call.duration_seconds || 0;
+          const durMin = Math.floor(durSec / 60);
+          const durRemSec = durSec % 60;
+          const durStr = `${durMin}m ${String(durRemSec).padStart(2,'0')}s`;
+
+          // Determine status badge
+          const hasIntel = (call.intel_count || 0) > 0;
+          const statusClass = call.status === 'completed' ? (hasIntel ? 'intel' : 'intercepted') : 'blocked';
+          const statusLabel = call.status === 'completed' ? (hasIntel ? 'INTEL GATHERED' : 'INTERCEPTED') : call.status.toUpperCase();
+
+          div.innerHTML = `
+            <div class="archive-item-header" onclick="toggleItem('${itemId}')">
+              <div class="archive-id">#${(call.id || '').substring(0, 10)}</div>
+              <div class="archive-info">
+                <div class="archive-name">Call from ${call.caller_number || 'Unknown'}</div>
+                <div class="archive-date">Detected: ${new Date(call.start_time).toLocaleString()}</div>
+              </div>
+              <div class="archive-dur"><div class="archive-dur-label">DURATION</div><div class="archive-dur-val">${durStr}</div></div>
+              <div class="archive-status ${statusClass}">${statusLabel}</div>
+              <i data-lucide="chevron-down" class="archive-chevron" style="width:16px;height:16px"></i>
+            </div>
+            <div class="archive-item-body">
+              <div>
+                <div class="section-tag"><i data-lucide="key" style="width:12px;height:12px"></i> EXTRACTED INTELLIGENCE</div>
+                <div class="extracted-grid" id="intel-${itemId}">
+                  <div class="ext-row"><span class="ext-key">Loading...</span><span class="ext-val">—</span></div>
+                </div>
+              </div>
+              <div>
+                <div class="section-tag"><i data-lucide="activity" style="width:12px;height:12px"></i> ACTIVITY TIMELINE</div>
+                <div class="timeline-items" id="timeline-${itemId}">
+                  <p class="summary-text">Click to load transcript</p>
+                </div>
+              </div>
+              <button class="replay-btn" data-call-id="${call.id}"><i data-lucide="play" style="width:15px;height:15px"></i> Replay Interception</button>
+            </div>
+          `;
+
+          // Load details on expand
+          div.querySelector('.archive-item-header').addEventListener('click', () => {
+            if (!div.dataset.loaded) {
+              div.dataset.loaded = 'true';
+              fetch(BACKEND_URL + '/api/calls/' + call.id + '/transcript')
+                .then(r => r.json())
+                .then(detail => {
+                  // Render intel
+                  const intelEl = document.getElementById('intel-' + itemId);
+                  if (detail.intel && detail.intel.length > 0) {
+                    intelEl.innerHTML = detail.intel.map(i =>
+                      `<div class="ext-row"><span class="ext-key">${i.field_name}</span><span class="ext-val">${i.field_value}</span></div>`
+                    ).join('');
+                  } else {
+                    intelEl.innerHTML = '<div class="ext-row"><span class="ext-key">Status</span><span class="ext-val">No intel extracted</span></div>';
+                  }
+
+                  // Render timeline
+                  const timelineEl = document.getElementById('timeline-' + itemId);
+                  if (detail.messages && detail.messages.length > 0) {
+                    timelineEl.innerHTML = detail.messages.slice(0, 8).map(m => {
+                      const cls = m.role === 'user' ? 'scammer' : 'ai';
+                      return `<div class="timeline-item"><span class="timeline-time">${cls === 'scammer' ? 'SC' : 'AI'}</span><div class="timeline-quote ${cls}">"${m.content.substring(0, 120)}${m.content.length > 120 ? '...' : ''}"</div></div>`;
+                    }).join('');
+                  } else {
+                    timelineEl.innerHTML = '<p class="summary-text">No transcript recorded</p>';
+                  }
+                })
+                .catch(() => {});
+            }
+          });
+
+          list.prepend(div);
+        });
+        lucide.createIcons();
+      } else {
+        loadDemoStats();
+      }
+    })
+    .catch(() => loadDemoStats());
+
+  function loadDemoStats() {
+    setTimeout(() => {
+      animateCount(document.getElementById('totalVal'), 12482);
+      animateCount(document.getElementById('savingsVal'), 420800, '$');
+    }, 300);
+  }
+
+  gsap.from('.sidebar',{x:-40,opacity:0,duration:0.6,ease:'power3.out'});
+  gsap.from('.astat',{y:20,opacity:0,duration:0.5,stagger:0.08,delay:0.2,ease:'power2.out'});
+  gsap.from('.archive-item',{y:16,opacity:0,duration:0.4,stagger:0.08,delay:0.3,ease:'power2.out'});
+
+  // ── REPLAY DATA ──────────────────────────────────────────────
+  const replayData = {
+    'item-8802': {
+      title: '#SC-8802 — Tech Support Scam',
+      duration: '12:45',
+      msgs: [
+        {t:'sc', ts:'00:12', text:'Hello, I am Mark from Windows Security Department. We have detected a virus on your computer.'},
+        {t:'ai', ts:'00:31', text:'Oh dear! A virus? Which computer? I have three, beta...'},
+        {t:'sc', ts:'00:48', text:'Madam please take this seriously. You must download a tool called TeamViewer immediately.'},
+        {t:'ai', ts:'01:10', text:'TeamViewer? Let me write that down. T-E-A... wait, is it one word or two? My handwriting is so bad.'},
+        {t:'sc', ts:'01:35', text:'One word! Type it in Google. Quickly!'},
+        {t:'ai', ts:'02:05', text:'Google... yes... my grandson set this up. The screen is so small. Can you increase the font size from your side?'},
+        {t:'sc', ts:'02:40', text:'MADAM I cannot change your screen! Just open the browser!'},
+        {t:'ai', ts:'04:38', text:'I opened something... it says Internet Explorer. Is that correct?'},
+        {t:'sc', ts:'05:00', text:'No! IE is old! Use Chrome!'},
+        {t:'ai', ts:'07:20', text:'I found TeamViewer. Now it is asking for a code. What is the code?'},
+        {t:'sc', ts:'07:35', text:'Wait for me to give it. First tell me your full name.'},
+        {t:'ai', ts:'11:45', text:'My name is... oh, did I turn the stove off? One moment beta...'},
+        {t:'sc', ts:'12:10', text:'MADAM --- [call disconnected in frustration]'},
+      ]
+    },
+    'item-8795': {
+      title: '#SC-8795 — Crypto Wallet Impersonation',
+      duration: '05:12',
+      msgs: [
+        {t:'sc', ts:'00:05', text:'Your Coinbase wallet has been flagged for 3 unauthorized transactions totalling $4,200.'},
+        {t:'ai', ts:'00:22', text:'Oh no! I only put $20 in there so far. How can there be $4,200?'},
+        {t:'sc', ts:'00:40', text:'Someone hacked your account. We need your seed phrase to recover it immediately.'},
+        {t:'ai', ts:'01:02', text:'My seed phrase... yes I wrote it down. It is somewhere in this drawer...'},
+        {t:'sc', ts:'01:30', text:'Please hurry madam. Every second the hackers are draining more.'},
+        {t:'ai', ts:'02:10', text:'I found a paper. The first word is... wait, my reading glasses are in the other room.'},
+        {t:'sc', ts:'02:45', text:'Can you not read it without glasses? Just try!'},
+        {t:'ai', ts:'03:30', text:'It says... G-A-R... is that garden? Or garlic? My handwriting is terrible.'},
+        {t:'sc', ts:'04:20', text:'Madam, garlic is not a seed phrase word!'},
+        {t:'ai', ts:'05:01', text:'Maybe it is garden then. Or was it garden-state? I visited New Jersey once...'},
+        {t:'sc', ts:'05:10', text:'[Scammer disconnects]'},
+      ]
+    },
+    'item-8790': {
+      title: '#SC-8790 — Amazon Refund Scam',
+      duration: '22:10',
+      msgs: [
+        {t:'sc', ts:'00:10', text:'This is Amazon customer care. A refund of ₹400 was sent to your account by mistake. You must return it.'},
+        {t:'ai', ts:'00:35', text:'Oh really? ₹400? That is very honest of you to call. Most people would keep it!'},
+        {t:'sc', ts:'00:55', text:'We need you to open your bank app and transfer it back to us.'},
+        {t:'ai', ts:'01:20', text:'Of course! Let me find my phone. Is it this phone? Or the other one? I have two...'},
+        {t:'sc', ts:'08:00', text:'Madam please open your SBI app and tell me your balance.'},
+        {t:'ai', ts:'08:40', text:'It is loading... these apps take so long. In my time, we went to the bank and the peon knew our name!'},
+        {t:'sc', ts:'15:00', text:'Can you see the transfer option?'},
+        {t:'ai', ts:'15:30', text:'Yes! But it says my OTP expired. Should I request another?'},
+        {t:'sc', ts:'18:00', text:'Yes! Quickly! What is the OTP?'},
+        {t:'ai', ts:'22:05', text:'It says 4... 8... 2... oh wait is that a 2 or a 7? My eyes are so bad.'},
+        {t:'sc', ts:'22:08', text:'[Call center detected — intelligence gathered — subject terminated call]'},
+      ]
+    },
+    'item-8785': {
+      title: '#SC-8785 — Bank KYC Phishing',
+      duration: '18:30',
+      msgs: [
+        {t:'sc', ts:'00:08', text:'Your SBI account KYC has expired. Your account will be blocked in 2 hours.'},
+        {t:'ai', ts:'00:30', text:'Blocked?! But I need to pay my milk bill tomorrow!'},
+        {t:'sc', ts:'00:50', text:'Give me your Aadhaar number and OTP to re-verify.'},
+        {t:'ai', ts:'06:20', text:'Before I give anything, what is your official SBI branch code? I must verify you are real.'},
+        {t:'sc', ts:'06:45', text:'Madam we do not give branch codes to customers, it is policy.'},
+        {t:'ai', ts:'07:10', text:'But the real SBI gave me a code. It was... what was it... let me find it...'},
+        {t:'sc', ts:'17:45', text:'Just give me the OTP! Why are you asking so many questions?!'},
+        {t:'ai', ts:'18:00', text:'Because my son told me to always verify. Also, where is branch code BR-41192?'},
+        {t:'sc', ts:'18:28', text:'[Scammer hangs up]'},
+      ]
+    },
+  };
+
+  // ── REPLAY MODAL LOGIC ─────────────────────────────────────
+  const overlay   = document.getElementById('replayOverlay');
+  const closeBtn  = document.getElementById('replayCloseBtn');
+  const feed      = document.getElementById('replayFeed');
+  const fill      = document.getElementById('replayFill');
+  const titleEl   = document.getElementById('replayTitle');
+  const elapsed   = document.getElementById('replayElapsed');
+  const totalEl   = document.getElementById('replayTotal');
+  let replayTimer = null;
+
+  function fmtTime(s) { return `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`; }
+
+  function openReplay(id, label) {
+    const data = replayData[id];
+    const msgs = data ? data.msgs : [
+      {t:'sc', ts:'00:05', text:'[Demo transcript] — Scammer opened with standard IRS impersonation script.'},
+      {t:'ai', ts:'00:30', text:'AI persona engaged — stalling strategy active.'},
+      {t:'sc', ts:'02:10', text:'Scammer demanded immediate gift-card payment.'},
+      {t:'ai', ts:'02:45', text:'AI asks which store, pretends to look for car keys — scammer waits.'},
+      {t:'sc', ts:'07:00', text:'[Scammer loses patience and hangs up]'},
+    ];
+    const title = data ? data.title : label || 'Interception Replay';
+    const durStr = data ? data.duration : '07:00';
+
+    titleEl.textContent = title;
+    totalEl.textContent = durStr;
+    elapsed.textContent = '00:00';
+    fill.style.width = '0%';
+    feed.innerHTML = '';
+    overlay.classList.add('open');
+    lucide.createIcons();
+
+    // Calculate total seconds
+    const [mm,ss] = durStr.split(':').map(Number);
+    const totalSec = mm*60+ss;
+    let msgIdx = 0;
+    let secElapsed = 0;
+
+    clearInterval(replayTimer);
+    replayTimer = setInterval(() => {
+      secElapsed++;
+      elapsed.textContent = fmtTime(secElapsed);
+      fill.style.width = Math.min((secElapsed/totalSec)*100, 100) + '%';
+
+      // Show next message whose timestamp <= elapsed
+      while (msgIdx < msgs.length) {
+        const [mm2,ss2] = msgs[msgIdx].ts.split(':').map(Number);
+        const msgSec = mm2*60+ss2;
+        if (secElapsed >= msgSec) {
+          const m = msgs[msgIdx];
+          const div = document.createElement('div');
+          div.className = `rmsg ${m.t}`;
+          div.innerHTML = `
+            <span class="rmsg-label ${m.t}">${m.t==='sc'?'SCAMMER':'KARMA AI'}</span>
+            <span class="rmsg-bubble">${m.text}</span>
+            <span class="rmsg-timestamp">${m.ts}</span>
+          `;
+          feed.appendChild(div);
+          requestAnimationFrame(()=>requestAnimationFrame(()=>div.classList.add('show')));
+          feed.scrollTop = feed.scrollHeight;
+          msgIdx++;
+        } else break;
+      }
+
+      if (secElapsed >= totalSec) clearInterval(replayTimer);
+    }, 400); // 400ms = ~2.5x speed
+  }
+
+  function closeReplay() {
+    overlay.classList.remove('open');
+    clearInterval(replayTimer);
+  }
+
+  closeBtn.addEventListener('click', closeReplay);
+  overlay.addEventListener('click', e => { if(e.target===overlay) closeReplay(); });
+
+  // Wire up all replay buttons (current + dynamically added)
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('.replay-btn');
+    if (!btn) return;
+    const item = btn.closest('.archive-item');
+    const id = item ? item.id : null;
+    const label = item ? item.querySelector('.archive-name')?.textContent : 'Interception Replay';
+    openReplay(id, label);
+  });
+
+  // ── GENERATE RANDOM ─────────────────────────────────────────
+  const randScams = [
+    {id:'SC-8770',name:'Paytm Wallet Freeze',dur:'11m 40s',status:'intercepted',label:'INTERCEPTED',ip:'103.11.55.9',phone:'+91 9823 XXX 441'},
+    {id:'SC-8760',name:'TRAI SIM Block Threat',dur:'08m 20s',status:'blocked',label:'BLOCKED',ip:'45.115.78.22',phone:'+91 9731 XXX 900'},
+    {id:'SC-8755',name:'Aadhaar Deactivation',dur:'24m 15s',status:'intercepted',label:'INTERCEPTED',ip:'103.89.3.167',phone:'+91 8001 XXX 212'},
+    {id:'SC-8748',name:'EPFO Pension Scam',dur:'36m 00s',status:'intel',label:'INTEL GATHERED',ip:'202.65.80.11',phone:'N/A'},
+    {id:'SC-8740',name:'Courier Drug Extortion',dur:'05m 08s',status:'discarded',label:'DISCARDED',ip:'Unknown',phone:'Unknown'},
+  ];
+
+  document.getElementById('genRandomBtn').addEventListener('click', () => {
+    const list = document.querySelector('.archive-list');
+    const pick = randScams[Math.floor(Math.random() * randScams.length)];
+    const div = document.createElement('div');
+    div.className = 'archive-item';
+    const newId = 'rand-' + Date.now();
+    div.id = newId;
+    div.innerHTML = `
+      <div class="archive-item-header" onclick="toggleItem('${newId}')">
+        <div class="archive-id">#${pick.id}-R</div>
+        <div class="archive-info"><div class="archive-name">${pick.name}</div><div class="archive-date">Generated: ${new Date().toLocaleString()}</div></div>
+        <div class="archive-dur"><div class="archive-dur-label">DURATION</div><div class="archive-dur-val">${pick.dur}</div></div>
+        <div class="archive-status ${pick.status}">${pick.label}</div>
+        <i data-lucide="chevron-down" class="archive-chevron" style="width:16px;height:16px"></i>
+      </div>
+      <div class="archive-item-body">
+        <div>
+          <div class="section-tag">AUTO-SUMMARY</div>
+          <p class="summary-text">Randomly generated demo entry for <strong>${pick.name}</strong>. Real call data loads here after backend is connected.</p>
+          <div class="section-tag" style="margin-top:14px;">EXTRACTED INTELLIGENCE</div>
+          <div class="extracted-grid">
+            <div class="ext-row"><span class="ext-key">Origin IP</span><span class="ext-val">${pick.ip}</span></div>
+            <div class="ext-row"><span class="ext-key">Phone</span><span class="ext-val">${pick.phone}</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="section-tag">NOTE</div>
+          <p class="summary-text" style="color:var(--orange);font-size:12px;">⚠️ Connect backend to populate real data. Stats reset automatically.</p>
+        </div>
+        <button class="replay-btn"><i data-lucide="play" style="width:15px;height:15px"></i> Replay Interception</button>
+      </div>
+    `;
+    list.prepend(div);
+    lucide.createIcons();
+    gsap.from(div,{y:-16,opacity:0,duration:0.4,ease:'power2.out'});
+  });
+});
+</script>
+</body>
+</html>

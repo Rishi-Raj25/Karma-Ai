@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KARMA — Analytics</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36'%3E%3Ccircle cx='18' cy='18' r='16' stroke='%23C4F82A' stroke-width='2.5' stroke-dasharray='4 3' fill='none'/%3E%3Cpath d='M18 6V18L26 26' stroke='%23C4F82A' stroke-width='2.5' stroke-linecap='round' fill='none'/%3E%3Ccircle cx='18' cy='18' r='3' fill='%23C4F82A'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <link rel="stylesheet" href="dashboard.css" />
+  <style>
+    .alert-bar { display:flex; align-items:center; gap:16px; background:var(--bg-card); border:1px solid var(--border); border-left:3px solid var(--orange); border-radius:var(--radius); padding:16px 20px; margin-bottom:24px; }
+    .alert-icon { width:40px;height:40px; background:rgba(227,179,65,0.12); border:1px solid rgba(227,179,65,0.3); border-radius:10px; display:flex;align-items:center;justify-content:center; color:var(--orange); flex-shrink:0; }
+    .alert-text { flex:1; }
+    .alert-title { font-weight:700; font-size:14px; margin-bottom:3px; }
+    .alert-desc { font-size:12px; color:var(--text-dim); }
+    .review-btn { padding:9px 18px; background:var(--accent); color:#0a0f0a; font-size:12px; font-weight:700; border-radius:8px; border:none; cursor:pointer; white-space:nowrap; transition:all 0.2s; }
+    .review-btn:hover { transform:translateY(-1px); box-shadow:0 6px 20px var(--accent-glow); }
+    .stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px; }
+    .stat-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:20px; position:relative; overflow:hidden; }
+    .stat-card-label { font-size:10px; font-weight:600; letter-spacing:1.5px; color:var(--text-dim); text-transform:uppercase; margin-bottom:10px; }
+    .stat-card-val { font-family:var(--font-mono); font-size:30px; font-weight:700; color:var(--text); line-height:1; }
+    .stat-card-val.orange { color:var(--orange); }
+    .stat-card-val.blue { color:#58a6ff; }
+    .stat-badge { display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:600; padding:2px 8px; border-radius:4px; margin-top:8px; }
+    .stat-badge.up { background:rgba(61,220,132,0.1); color:var(--accent); }
+    .stat-badge.stable { background:rgba(88,166,255,0.1); color:#58a6ff; }
+    .stat-badge.elevated { background:rgba(227,179,65,0.1); color:var(--orange); }
+    .chart-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:24px; margin-bottom:24px; }
+    .chart-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; }
+    .chart-title { font-size:14px; font-weight:600; display:flex; align-items:center; gap:8px; }
+    .chart-legend { display:flex; align-items:center; gap:8px; font-size:11px; color:var(--text-dim); }
+    .legend-dot { width:8px; height:8px; border-radius:50%; background:var(--accent); box-shadow:0 0 6px var(--accent-glow); }
+    .chart-x-labels { display:flex; justify-content:space-between; padding:8px 0 0; font-size:11px; color:var(--text-dim); }
+    .donut-wrap { display:flex; align-items:center; justify-content:center; gap:32px; padding:12px 0; }
+    .donut-stats { display:flex; flex-direction:column; gap:12px; }
+    .donut-stat-row { display:flex; align-items:center; gap:10px; font-size:12px; }
+    .donut-stat-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+    .donut-stat-label { color:var(--text-dim); flex:1; }
+    .donut-stat-val { font-family:var(--font-mono); font-weight:600; }
+    .analytics-body { padding:24px; overflow-y:auto; height:calc(100% - 60px); }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">
+        <svg width="22" height="22" viewBox="0 0 36 36" fill="none"><circle cx="18" cy="18" r="16" stroke="currentColor" stroke-width="2.5" stroke-dasharray="4 3"/><path d="M18 6V18L26 26" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><circle cx="18" cy="18" r="3" fill="currentColor"/></svg>
+      </div>
+      <div><div class="brand-name">KARMA <span style="color:var(--accent)">AI</span></div><div class="brand-sub">INTERCEPT SYSTEM</div></div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="live-calls.html" class="nav-item"><i data-lucide="radio" class="nav-icon"></i><span>Live Intercept</span></a>
+      <a href="analytics.html" class="nav-item active"><i data-lucide="bar-chart-2" class="nav-icon"></i><span>Analytics</span></a>
+      <a href="archive.html" class="nav-item"><i data-lucide="archive" class="nav-icon"></i><span>Intelligence Archive</span></a>
+    </nav>
+  </aside>
+  <div class="main-area">
+    <header class="top-bar">
+      <div class="top-bar-left">
+        <div class="search-bar"><i data-lucide="search" style="width:15px;height:15px;color:var(--text-dim)"></i><input type="text" placeholder="Search patterns, IDs or regions..." /></div>
+      </div>
+      <div class="top-bar-right">
+        <button class="nav-icon-btn"><i data-lucide="bell" style="width:16px;height:16px"></i></button>
+        <div class="user-chip"><div class="user-avatar">A</div><div><div style="font-size:12px;font-weight:600;">Admin Panel</div><div style="font-size:10px;color:var(--accent);">System Online</div></div></div>
+      </div>
+    </header>
+    <div class="analytics-body">
+      <div class="alert-bar">
+        <div class="alert-icon"><i data-lucide="alert-triangle" style="width:18px;height:18px"></i></div>
+        <div class="alert-text">
+          <div class="alert-title">Pattern Detection Alert</div>
+          <div class="alert-desc">High-frequency phishing attempt pattern detected from Mumbai region. IP range 103.21.XX.XX.</div>
+        </div>
+        <button class="review-btn">Review Protocol</button>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-card-label">Total Blocks (24H)</div><div class="stat-card-val" id="blocksVal">0</div><div class="stat-badge up">↑ +12.4%</div></div>
+        <div class="stat-card"><div class="stat-card-label">Detection Accuracy</div><div class="stat-card-val" id="accuracyVal">0%</div><div class="stat-badge stable">Stable</div></div>
+        <div class="stat-card"><div class="stat-card-label">Threat Level</div><div class="stat-card-val orange">Moderate</div><div class="stat-badge elevated">Elevated</div></div>
+        <div class="stat-card"><div class="stat-card-label">System Latency</div><div class="stat-card-val blue" id="latencyVal">0ms</div><div class="stat-badge up">↓ -2ms</div></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title"><i data-lucide="trending-up" style="width:16px;height:16px;color:var(--accent)"></i>Scam Frequency (Last 7 Days)</div>
+          <div class="chart-legend"><span class="legend-dot"></span> INTERCEPTED THREATS</div>
+        </div>
+        <div style="position:relative;height:200px;"><svg id="lineChart" style="width:100%;height:100%;overflow:visible;" viewBox="0 0 800 200" preserveAspectRatio="none"></svg></div>
+        <div class="chart-x-labels"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header"><div class="chart-title"><i data-lucide="pie-chart" style="width:16px;height:16px;color:var(--accent)"></i>Success Rate</div></div>
+        <div class="donut-wrap">
+          <div style="position:relative;width:140px;height:140px;">
+            <svg viewBox="0 0 140 140" style="width:140px;height:140px;">
+              <defs><filter id="glow"><feGaussianBlur stdDeviation="3" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+              <circle cx="70" cy="70" r="54" fill="none" stroke="var(--bg-elevated)" stroke-width="14"/>
+              <circle cx="70" cy="70" r="54" fill="none" stroke="var(--accent)" stroke-width="14" stroke-dasharray="339.29" stroke-dashoffset="339.29" stroke-linecap="round" transform="rotate(-90 70 70)" id="donutArc" filter="url(#glow)"/>
+              <text x="70" y="66" text-anchor="middle" fill="var(--accent)" font-family="JetBrains Mono" font-size="20" font-weight="700">95%</text>
+              <text x="70" y="84" text-anchor="middle" fill="var(--text-dim)" font-family="Inter" font-size="9" letter-spacing="1">NEUTRALIZED</text>
+            </svg>
+          </div>
+          <div class="donut-stats">
+            <div class="donut-stat-row"><div class="donut-stat-dot" style="background:var(--accent)"></div><div class="donut-stat-label">Neutralized</div><div class="donut-stat-val" style="color:var(--accent)">95%</div></div>
+            <div class="donut-stat-row"><div class="donut-stat-dot" style="background:#58a6ff"></div><div class="donut-stat-label">Blocked</div><div class="donut-stat-val" style="color:#58a6ff">3%</div></div>
+            <div class="donut-stat-row"><div class="donut-stat-dot" style="background:var(--red)"></div><div class="donut-stat-label">Escaped</div><div class="donut-stat-val" style="color:var(--red)">2%</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  lucide.createIcons();
+  function animateCount(el, target, suffix='', duration=1500) {
+    let start=0; const step=target/(duration/16);
+    const int=setInterval(()=>{ start=Math.min(start+step,target); el.textContent=Math.round(start).toLocaleString()+suffix; if(start>=target) clearInterval(int); },16);
+  }
+
+  const BACKEND_URL = window.location.origin;
+
+  // Try to fetch real stats from backend, fallback to demo data
+  fetch(BACKEND_URL + '/api/stats')
+    .then(r => r.json())
+    .then(stats => {
+      if (stats.total_calls > 0) {
+        setTimeout(() => {
+          animateCount(document.getElementById('blocksVal'), stats.total_calls);
+          animateCount(document.getElementById('accuracyVal'), stats.success_rate || 99.98, '%');
+          animateCount(document.getElementById('latencyVal'), 14, 'ms');
+        }, 300);
+
+        // Update chart with real weekly data if available
+        if (stats.calls_this_week && stats.calls_this_week.length > 0) {
+          renderChart(stats.calls_this_week);
+        } else {
+          renderChart(demoData);
+        }
+
+        // Update donut with real success rate
+        if (stats.success_rate) {
+          const rate = stats.success_rate / 100;
+          setTimeout(() => {
+            const arc = document.getElementById('donutArc');
+            arc.style.transition = 'stroke-dashoffset 1.5s ease';
+            arc.style.strokeDashoffset = 339.29 * (1 - rate);
+          }, 500);
+        }
+      } else {
+        loadDemoStats();
+        renderChart(demoData);
+      }
+    })
+    .catch(() => {
+      loadDemoStats();
+      renderChart(demoData);
+    });
+
+  function loadDemoStats() {
+    setTimeout(()=>{ animateCount(document.getElementById('blocksVal'),42861); animateCount(document.getElementById('accuracyVal'),99.98,'%'); animateCount(document.getElementById('latencyVal'),14,'ms'); },300);
+    setTimeout(()=>{ const arc=document.getElementById('donutArc'); arc.style.transition='stroke-dashoffset 1.5s ease'; arc.style.strokeDashoffset=339.29*(1-0.95); },500);
+  }
+
+  const demoData=[12,18,22,30,26,42,55,60];
+  function renderChart(data) {
+    const svg=document.getElementById('lineChart');
+    svg.innerHTML = '';
+    const W=800,H=200,pad=20;
+    const mn=Math.min(...data),mx=Math.max(...data)||1;
+    const pts=data.map((v,i)=>[pad+(i/(data.length-1))*(W-pad*2), H-pad-((v-mn)/(mx-mn||1))*(H-pad*2)]);
+    for(let i=0;i<=4;i++){const l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1',pad);l.setAttribute('x2',W-pad);l.setAttribute('y1',pad+(i/4)*(H-pad*2));l.setAttribute('y2',pad+(i/4)*(H-pad*2));l.setAttribute('stroke','rgba(255,255,255,0.04)');l.setAttribute('stroke-width','1');svg.appendChild(l);}
+    const defs=document.createElementNS('http://www.w3.org/2000/svg','defs');
+    const grad=document.createElementNS('http://www.w3.org/2000/svg','linearGradient');
+    grad.setAttribute('id','ag');grad.setAttribute('x1','0');grad.setAttribute('y1','0');grad.setAttribute('x2','0');grad.setAttribute('y2','1');
+    grad.innerHTML='<stop offset="0%" stop-color="#3ddc84" stop-opacity="0.2"/><stop offset="100%" stop-color="#3ddc84" stop-opacity="0"/>';
+    defs.appendChild(grad);svg.appendChild(defs);
+    const area=document.createElementNS('http://www.w3.org/2000/svg','path');
+    area.setAttribute('d',`M${pts[0][0]},${H-pad} L${pts.map(p=>p.join(',')).join(' L')} L${pts[pts.length-1][0]},${H-pad} Z`);
+    area.setAttribute('fill','url(#ag)');svg.appendChild(area);
+    const pth=document.createElementNS('http://www.w3.org/2000/svg','path');
+    pth.setAttribute('d',`M${pts.map(p=>p.join(',')).join(' L')}`);
+    pth.setAttribute('fill','none');pth.setAttribute('stroke','var(--accent)');pth.setAttribute('stroke-width','2.5');pth.setAttribute('stroke-linecap','round');pth.setAttribute('stroke-linejoin','round');
+    pth.style.filter='drop-shadow(0 0 6px rgba(61,220,132,0.6))';svg.appendChild(pth);
+    pts.forEach(([x,y])=>{const c=document.createElementNS('http://www.w3.org/2000/svg','circle');c.setAttribute('cx',x);c.setAttribute('cy',y);c.setAttribute('r','4');c.setAttribute('fill','var(--accent)');c.setAttribute('stroke','#0d1117');c.setAttribute('stroke-width','2');svg.appendChild(c);});
+    const len=pth.getTotalLength();
+    pth.style.strokeDasharray=len;pth.style.strokeDashoffset=len;
+    gsap.to(pth,{strokeDashoffset:0,duration:1.8,ease:'power2.inOut',delay:0.3});
+  }
+
+  gsap.from('.sidebar',{x:-40,opacity:0,duration:0.6,ease:'power3.out'});
+  gsap.from('.stat-card',{y:20,opacity:0,duration:0.5,stagger:0.08,delay:0.3,ease:'power2.out'});
+});
+</script>
+</body>
+</html>

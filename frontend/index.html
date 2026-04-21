@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Karma — AI That Fights Scammers</title>
+    <meta name="description" content="Karma uses AI to waste scammers' time, protecting real people. An intelligent defense system that intercepts fraud calls and keeps scammers busy." />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36'%3E%3Ccircle cx='18' cy='18' r='16' stroke='%23C4F82A' stroke-width='2.5' stroke-dasharray='4 3' fill='none'/%3E%3Cpath d='M18 6V18L26 26' stroke='%23C4F82A' stroke-width='2.5' stroke-linecap='round' fill='none'/%3E%3Ccircle cx='18' cy='18' r='3' fill='%23C4F82A'/%3E%3C/svg%3E" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
+    <!-- GSAP + ScrollTrigger -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/TextPlugin.min.js"></script>
+
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- Preloader -->
+    <div class="preloader" id="preloader">
+      <div class="preloader-inner">
+        <div class="preloader-logo">
+          <svg width="60" height="60" viewBox="0 0 36 36" fill="none">
+            <circle cx="18" cy="18" r="16" stroke="#C4F82A" stroke-width="2.5" stroke-dasharray="4 3" class="preloader-circle"/>
+            <path d="M18 6V18L26 26" stroke="#C4F82A" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="18" cy="18" r="3" fill="#C4F82A"/>
+          </svg>
+        </div>
+        <div class="preloader-text">KARMA</div>
+        <div class="preloader-bar">
+          <div class="preloader-bar-fill" id="preloaderBar"></div>
+        </div>
+        <div class="preloader-status" id="preloaderStatus">Initializing defense system...</div>
+      </div>
+    </div>
+
+    <!-- Cursor Ball -->
+    <div class="cursor-ball" id="cursorBall"></div>
+    <div class="cursor-ring" id="cursorRing"></div>
+
+    <!-- Navbar -->
+    <nav class="navbar" id="navbar">
+      <div class="nav-inner">
+        <a href="#home" class="logo">
+          <div class="logo-icon">
+            <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+              <circle cx="18" cy="18" r="16" stroke="currentColor" stroke-width="2.5" stroke-dasharray="4 3"/>
+              <path d="M18 6V18L26 26" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+              <circle cx="18" cy="18" r="3" fill="currentColor"/>
+            </svg>
+          </div>
+          <span class="logo-text">KARMA</span>
+        </a>
+
+        <div class="nav-links" id="navLinks">
+          <a href="#home" class="nav-link active">Home</a>
+          <a href="#how-it-works" class="nav-link">How It Works</a>
+          <a href="#stats" class="nav-link">Impact</a>
+          <a href="live-calls.html" class="nav-link">Live Dashboard</a>
+          <a href="#features" class="nav-link">Features</a>
+        </div>
+
+        <div class="nav-actions">
+          <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+      <div class="hero-particles" id="heroParticles"></div>
+      <div class="hero-gradient"></div>
+      <div class="hero-grid-bg"></div>
+      <div class="hero-confetti" id="heroConfetti"></div>
+
+      <div class="hero-content">
+        <div class="hero-badge" id="heroBadge">
+          <span class="badge-pulse"></span>
+          <i data-lucide="shield-check" style="width:16px;height:16px"></i>
+          <span>Scam Defense System</span>
+        </div>
+
+        <p class="hero-tagline-hindi" id="heroTagline">"Beta, tumse na ho payega."</p>
+
+        <!-- Energy Orb Visual Centerpiece -->
+        <div class="hero-orb-container">
+          <div class="hero-orb">
+            <div class="orb-core"></div>
+            <div class="orb-ring orb-ring-1"></div>
+            <div class="orb-ring orb-ring-2"></div>
+            <div class="orb-ring orb-ring-3"></div>
+            <div class="orb-pulse"></div>
+          </div>
+
+          <h1 class="hero-title" id="heroTitle">
+            <span class="title-line">
+              <span class="title-word" data-delay="0">K</span><span class="title-word" data-delay="0.05">A</span><span class="title-word" data-delay="0.1">R</span><span class="title-word" data-delay="0.15">M</span><span class="title-word" data-delay="0.2">A</span>
+            </span>
+          </h1>
+        </div>
+
+        <div class="hero-subtitle-block">
+          <p class="hero-subtitle" id="heroSubtitle">The AI That Wastes Scammers' Time<span class="typewriter-cursor">|</span></p>
+          <p class="hero-desc" id="heroDesc">What Goes Around, Comes Around</p>
+        </div>
+
+        <div class="hero-metrics">
+          <div class="metric">
+            <span class="metric-value" data-target="15420">0</span>
+            <span class="metric-label">Hours Wasted</span>
+          </div>
+          <div class="metric-divider"></div>
+          <div class="metric">
+            <span class="metric-value" data-target="8734">0</span>
+            <span class="metric-label">Scams Blocked</span>
+          </div>
+          <div class="metric-divider"></div>
+          <div class="metric">
+            <span class="metric-value" data-target="24" data-prefix="₹" data-suffix="L+">0</span>
+            <span class="metric-label">Money Saved</span>
+          </div>
+        </div>
+
+        <div class="hero-actions">
+          <a href="live-calls.html" class="btn-primary" id="watchDemoBtn">
+            <i data-lucide="play-circle" style="width:20px;height:20px"></i>
+            <span>Watch Demo</span>
+          </a>
+          <a href="#how-it-works" class="btn-outline">
+            <span>How It Works</span>
+            <i data-lucide="chevron-down" style="width:18px;height:18px"></i>
+          </a>
+        </div>
+      </div>
+
+      <div class="scroll-indicator" id="scrollIndicator">
+        <div class="scroll-mouse">
+          <div class="scroll-wheel"></div>
+        </div>
+        <span class="scroll-text">Scroll to explore</span>
+      </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="section how-it-works" id="how-it-works">
+      <div class="section-wipe"></div>
+      <div class="section-confetti" data-confetti-section></div>
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag"><i data-lucide="zap" style="width:14px;height:14px"></i> Process</span>
+          <h2 class="section-title">How <span class="highlight">Karma</span> Works</h2>
+          <p class="section-desc">Four simple steps to outsmart scammers</p>
+        </div>
+
+        <div class="steps-timeline">
+          <div class="timeline-line"></div>
+
+          <div class="step" data-step="01">
+            <div class="step-marker">
+              <div class="step-number">01</div>
+              <div class="step-icon-wrap">
+                <i data-lucide="scan-search" style="width:28px;height:28px"></i>
+              </div>
+            </div>
+            <div class="step-content">
+              <h3>Scammer Detection</h3>
+              <p>Our AI analyzes incoming calls in real-time, identifying scam patterns, suspicious keywords, and known fraud tactics using advanced machine learning.</p>
+            </div>
+          </div>
+
+          <div class="step" data-step="02">
+            <div class="step-marker">
+              <div class="step-number">02</div>
+              <div class="step-icon-wrap">
+                <i data-lucide="user-round-check" style="width:28px;height:28px"></i>
+              </div>
+            </div>
+            <div class="step-content">
+              <h3>AI "Granny" Takes Over</h3>
+              <p>Once detected, our AI persona — a sweet, confused elderly woman — engages the scammer in conversation, keeping them occupied and away from real victims.</p>
+            </div>
+          </div>
+
+          <div class="step" data-step="03">
+            <div class="step-marker">
+              <div class="step-number">03</div>
+              <div class="step-icon-wrap">
+                <i data-lucide="timer" style="width:28px;height:28px"></i>
+              </div>
+            </div>
+            <div class="step-content">
+              <h3>Time Wasting Tactics</h3>
+              <p>Granny asks them to repeat, claims hearing problems, goes on tangents about her grandchildren, and creates realistic delays that frustrate scammers.</p>
+            </div>
+          </div>
+
+          <div class="step" data-step="04">
+            <div class="step-marker">
+              <div class="step-number">04</div>
+              <div class="step-icon-wrap">
+                <i data-lucide="database" style="width:28px;height:28px"></i>
+              </div>
+            </div>
+            <div class="step-content">
+              <h3>Data Collection &amp; Reporting</h3>
+              <p>While keeping them busy, we gather intelligence: phone numbers, scripts, tactics, and locations. This data is shared with authorities to shut down operations.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="section stats-section" id="stats">
+      <div class="section-wipe"></div>
+      <div class="section-confetti" data-confetti-section></div>
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag"><i data-lucide="bar-chart-3" style="width:14px;height:14px"></i> Impact</span>
+          <h2 class="section-title">Impact in <span class="highlight">Numbers</span></h2>
+          <p class="section-desc">Real results from real scam interceptions</p>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon-bg">
+              <i data-lucide="clock" style="width:32px;height:32px"></i>
+            </div>
+            <div class="stat-number" data-target="15420">0</div>
+            <div class="stat-label">Hours of Scammer<br/>Time Wasted</div>
+            <div class="stat-bar"><div class="stat-bar-fill" style="--fill-width: 87%"></div></div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon-bg">
+              <i data-lucide="shield-off" style="width:32px;height:32px"></i>
+            </div>
+            <div class="stat-number" data-target="8734">0</div>
+            <div class="stat-label">Scam Calls<br/>Intercepted</div>
+            <div class="stat-bar"><div class="stat-bar-fill" style="--fill-width: 72%"></div></div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon-bg">
+              <i data-lucide="users" style="width:32px;height:32px"></i>
+            </div>
+            <div class="stat-number" data-target="12589">0</div>
+            <div class="stat-label">People<br/>Protected</div>
+            <div class="stat-bar"><div class="stat-bar-fill" style="--fill-width: 95%"></div></div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon-bg">
+              <i data-lucide="indian-rupee" style="width:32px;height:32px"></i>
+            </div>
+            <div class="stat-number" data-target="2400000" data-prefix="₹">0</div>
+            <div class="stat-label">Money<br/>Saved</div>
+            <div class="stat-bar"><div class="stat-bar-fill" style="--fill-width: 68%"></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Live Dashboard CTA Section -->
+    <section class="section live-dash-section" id="live-dashboard">
+      <!-- Background layers -->
+      <div class="ldc-grid-bg"></div>
+      <div class="ldc-glow ldc-glow-1"></div>
+      <div class="ldc-glow ldc-glow-2"></div>
+      <canvas class="ldc-particles" id="ldcParticles"></canvas>
+      <div class="ldc-scanlines"></div>
+
+      <div class="container" style="max-width:960px;position:relative;z-index:2;">
+        <div class="live-cta-card" id="ldcCard">
+          <div class="live-cta-left">
+            <div class="live-cta-badge" id="ldcBadge">
+              <span class="live-cta-dot"></span>
+              LIVE NOW
+            </div>
+            <h2 class="live-cta-title" id="ldcTitle">Watch AI Intercept a Scammer <span class="highlight">in Real Time</span></h2>
+            <p class="live-cta-desc" id="ldcDesc">Our AI persona is actively engaged with a scammer right now. Open the live dashboard to watch the full transcript, session intel, and call controls.</p>
+            <div class="live-cta-actions" id="ldcActions">
+              <a href="live-calls.html" class="btn-primary" style="display:inline-flex;align-items:center;gap:10px;">
+                <i data-lucide="radio" style="width:18px;height:18px"></i>
+                Open Live Dashboard
+              </a>
+              <a href="archive.html" class="btn-outline" style="display:inline-flex;align-items:center;gap:8px;">
+                <i data-lucide="archive" style="width:16px;height:16px"></i>
+                View Archive
+              </a>
+            </div>
+          </div>
+          <div class="live-cta-right" id="ldcPreview">
+            <div class="live-cta-preview">
+              <div class="lcp-topbar">
+                <span class="lcp-badge"><span class="live-cta-dot" style="width:6px;height:6px;"></span>LIVE</span>
+                <span style="font-size:11px;color:#7d8590;font-family:monospace">Session ID-8842</span>
+              </div>
+              <div class="lcp-msgs" id="ldcMsgs">
+                <div class="lcp-msg lcp-scammer"><span class="lcp-who">SCAMMER</span><span>"Your tax refund of &#8377;50,000 will expire immediately..."</span></div>
+                <div class="lcp-msg lcp-ai"><span class="lcp-who" style="color:#3ddc84">KARMA AI</span><span>"Oh dear, let me find my glasses first, beta..."</span></div>
+                <div class="lcp-msg lcp-scammer"><span class="lcp-who">SCAMMER</span><span>"Madam please focus! Do you have your PAN card?"</span></div>
+                <div class="lcp-msg lcp-ai lcp-typing"><span class="lcp-who" style="color:#3ddc84">KARMA AI</span><span class="lcp-dots"><span></span><span></span><span></span></span></div>
+              </div>
+              <div class="lcp-waveform">
+                <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <script>
+      (function(){
+        // Particle canvas
+        const canvas = document.getElementById('ldcParticles');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        function resize(){ canvas.width=canvas.offsetWidth; canvas.height=canvas.offsetHeight; }
+        resize(); window.addEventListener('resize', resize);
+        const particles = Array.from({length:40},()=>({
+          x:Math.random()*canvas.width, y:Math.random()*canvas.height,
+          r:Math.random()*1.5+0.5, vx:(Math.random()-0.5)*0.3, vy:(Math.random()-0.5)*0.3,
+          o:Math.random()*0.5+0.1
+        }));
+        function draw(){
+          ctx.clearRect(0,0,canvas.width,canvas.height);
+          particles.forEach(p=>{
+            p.x+=p.vx; p.y+=p.vy;
+            if(p.x<0)p.x=canvas.width; if(p.x>canvas.width)p.x=0;
+            if(p.y<0)p.y=canvas.height; if(p.y>canvas.height)p.y=0;
+            ctx.beginPath();
+            ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+            ctx.fillStyle=`rgba(61,220,132,${p.o})`;
+            ctx.fill();
+          });
+          // Draw faint connection lines
+          particles.forEach((a,i)=>{ particles.slice(i+1).forEach(b=>{
+            const d=Math.hypot(a.x-b.x,a.y-b.y);
+            if(d<80){
+              ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y);
+              ctx.strokeStyle=`rgba(61,220,132,${0.08*(1-d/80)})`; ctx.lineWidth=0.6; ctx.stroke();
+            }
+          });});
+          requestAnimationFrame(draw);
+        }
+        draw();
+
+        // GSAP scroll animation
+        if(window.gsap && window.ScrollTrigger){
+          gsap.registerPlugin(ScrollTrigger);
+          gsap.from('#ldcBadge',{opacity:0,y:20,duration:0.5,scrollTrigger:{trigger:'#ldcCard',start:'top 80%'}});
+          gsap.from('#ldcTitle',{opacity:0,y:30,duration:0.6,delay:0.1,scrollTrigger:{trigger:'#ldcCard',start:'top 80%'}});
+          gsap.from('#ldcDesc',{opacity:0,y:20,duration:0.5,delay:0.2,scrollTrigger:{trigger:'#ldcCard',start:'top 80%'}});
+          gsap.from('#ldcActions',{opacity:0,y:20,duration:0.5,delay:0.3,scrollTrigger:{trigger:'#ldcCard',start:'top 80%'}});
+          gsap.from('#ldcPreview',{opacity:0,x:40,duration:0.7,delay:0.15,scrollTrigger:{trigger:'#ldcCard',start:'top 80%'}});
+        }
+
+        // Cycle preview messages
+        const extraMsgs = [
+          {cls:'lcp-scammer',who:'SCAMMER',txt:'"Give me the numbers on the back of the gift card!"'},
+          {cls:'lcp-ai',who:'KARMA AI',txt:'"Oh beta, the card is so small. Let me put on my second pair of glasses..."'},
+          {cls:'lcp-scammer',who:'SCAMMER',txt:'"Madam I do NOT have all day!"'},
+        ];
+        let mIdx=0;
+        setInterval(()=>{
+          const feed = document.getElementById('ldcMsgs');
+          if(!feed) return;
+          const m=extraMsgs[mIdx%extraMsgs.length]; mIdx++;
+          const d=document.createElement('div');
+          d.className='lcp-msg '+m.cls;
+          d.style.opacity='0'; d.style.transform='translateY(8px)';
+          d.style.transition='all 0.4s ease';
+          d.innerHTML=`<span class="lcp-who" ${m.cls==='lcp-ai'?'style="color:#3ddc84"':''}>${m.who}</span><span>${m.txt}</span>`;
+          feed.appendChild(d);
+          // Force reflow then fade in
+          requestAnimationFrame(()=>requestAnimationFrame(()=>{ d.style.opacity='1'; d.style.transform='translateY(0)'; }));
+          // Remove oldest if too many
+          while(feed.children.length>5) feed.removeChild(feed.firstChild);
+          feed.scrollTop=feed.scrollHeight;
+        }, 3500);
+      })();
+      </script>
+    </section>
+
+    <!-- Features Section -->
+    <section class="section features" id="features">
+      <div class="section-wipe"></div>
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag"><i data-lucide="sparkles" style="width:14px;height:14px"></i> Features</span>
+          <h2 class="section-title">Why <span class="highlight">Karma</span> Works</h2>
+          <p class="section-desc">Built with cutting-edge technology for maximum impact</p>
+        </div>
+
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i data-lucide="brain" style="width:28px;height:28px"></i>
+            </div>
+            <h3>Advanced AI Engine</h3>
+            <p>Powered by latest language models trained to mimic realistic human confusion, tangents, and elderly speech patterns.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i data-lucide="message-square-text" style="width:28px;height:28px"></i>
+            </div>
+            <h3>Smart Responses</h3>
+            <p>Trained on thousands of real conversations to keep scammers engaged with believable confusion and stories.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i data-lucide="hourglass" style="width:28px;height:28px"></i>
+            </div>
+            <h3>Maximum Time Waste</h3>
+            <p>Average call duration of 45 minutes. Every minute with Granny is a minute they can't scam real victims.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i data-lucide="bar-chart-big" style="width:28px;height:28px"></i>
+            </div>
+            <h3>Data Intelligence</h3>
+            <p>Collects phone numbers, scripts, and tactics. Shares intelligence with law enforcement to shut down operations.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i data-lucide="shield-check" style="width:28px;height:28px"></i>
+            </div>
+            <h3>Zero Risk</h3>
+            <p>No real person exposed to threats. No personal information shared. Just AI wasting scammers' time safely.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i data-lucide="activity" style="width:28px;height:28px"></i>
+            </div>
+            <h3>24/7 Protection</h3>
+            <p>Granny never sleeps. Round-the-clock interception of scam calls across multiple phone lines.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Before/After Section -->
+    <section class="section comparison-section" id="comparison">
+      <div class="section-wipe"></div>
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag"><i data-lucide="git-compare" style="width:14px;height:14px"></i> Impact</span>
+          <h2 class="section-title">Before & After <span class="highlight">Karma</span></h2>
+          <p class="section-desc">See the difference Karma makes in fighting scams</p>
+        </div>
+
+        <div class="comparison-container">
+          <div class="comparison-card comparison-before">
+            <div class="comparison-badge badge-before">
+              <i data-lucide="shield-off" style="width:18px;height:18px"></i>
+              Without Karma
+            </div>
+            <div class="comparison-items">
+              <div class="comparison-item item-bad">
+                <i data-lucide="x-circle" style="width:20px;height:20px"></i>
+                <div>
+                  <strong>Victim loses ₹2,00,000+</strong>
+                  <p>Average scam loss per victim in India</p>
+                </div>
+              </div>
+              <div class="comparison-item item-bad">
+                <i data-lucide="x-circle" style="width:20px;height:20px"></i>
+                <div>
+                  <strong>Scammer moves to next victim</strong>
+                  <p>Call ends in under 5 minutes</p>
+                </div>
+              </div>
+              <div class="comparison-item item-bad">
+                <i data-lucide="x-circle" style="width:20px;height:20px"></i>
+                <div>
+                  <strong>No data collected</strong>
+                  <p>Scammer identity remains unknown</p>
+                </div>
+              </div>
+              <div class="comparison-item item-bad">
+                <i data-lucide="x-circle" style="width:20px;height:20px"></i>
+                <div>
+                  <strong>Emotional trauma</strong>
+                  <p>Victims feel violated and helpless</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="comparison-divider">
+            <div class="comparison-vs">VS</div>
+          </div>
+
+          <div class="comparison-card comparison-after">
+            <div class="comparison-badge badge-after">
+              <i data-lucide="shield-check" style="width:18px;height:18px"></i>
+              With Karma
+            </div>
+            <div class="comparison-items">
+              <div class="comparison-item item-good">
+                <i data-lucide="check-circle" style="width:20px;height:20px"></i>
+                <div>
+                  <strong>₹0 lost — Scammer gets nothing</strong>
+                  <p>AI handles the call, no real victim involved</p>
+                </div>
+              </div>
+              <div class="comparison-item item-good">
+                <i data-lucide="check-circle" style="width:20px;height:20px"></i>
+                <div>
+                  <strong>45 minutes wasted</strong>
+                  <p>Every minute with Granny = fewer real victims</p>
+                </div>
+              </div>
+              <div class="comparison-item item-good">
+                <i data-lucide="check-circle" style="width:20px;height:20px"></i>
+                <div>
+                  <strong>Full scammer profile collected</strong>
+                  <p>Phone, location, tactics — shared with police</p>
+                </div>
+              </div>
+              <div class="comparison-item item-good">
+                <i data-lucide="check-circle" style="width:20px;height:20px"></i>
+                <div>
+                  <strong>Zero human risk</strong>
+                  <p>No real person is ever exposed to the scammer</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="section cta-section">
+      <div class="cta-bg-effects">
+        <div class="cta-orb cta-orb-1"></div>
+        <div class="cta-orb cta-orb-2"></div>
+      </div>
+      <div class="container">
+        <div class="cta-content">
+          <h2>Join the Fight<br/>Against <span class="highlight">Scammers</span></h2>
+          <p>Help us waste more scammers' time and protect more people across India</p>
+          <div class="cta-buttons">
+            <button class="btn-cta-primary">
+              <i data-lucide="flag" style="width:20px;height:20px"></i>
+              Report a Scammer
+            </button>
+            <button class="btn-cta-outline">
+              <i data-lucide="handshake" style="width:20px;height:20px"></i>
+              Partner with Us
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <div class="logo">
+              <div class="logo-icon">
+                <svg width="30" height="30" viewBox="0 0 36 36" fill="none">
+                  <circle cx="18" cy="18" r="16" stroke="currentColor" stroke-width="2.5" stroke-dasharray="4 3"/>
+                  <path d="M18 6V18L26 26" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                  <circle cx="18" cy="18" r="3" fill="currentColor"/>
+                </svg>
+              </div>
+              <span class="logo-text">KARMA</span>
+            </div>
+            <p>Fighting scammers, one confused conversation at a time.</p>
+            <div class="footer-socials">
+              <a href="#" aria-label="Twitter"><i data-lucide="twitter" style="width:18px;height:18px"></i></a>
+              <a href="#" aria-label="Github"><i data-lucide="github" style="width:18px;height:18px"></i></a>
+              <a href="#" aria-label="Mail"><i data-lucide="mail" style="width:18px;height:18px"></i></a>
+            </div>
+          </div>
+
+          <div class="footer-col">
+            <h4>Quick Links</h4>
+            <a href="#home">Home</a>
+            <a href="#how-it-works">How It Works</a>
+            <a href="#stats">Statistics</a>
+            <a href="#calls">Live Calls</a>
+          </div>
+
+          <div class="footer-col">
+            <h4>Contact</h4>
+            <a href="mailto:hello@karma.ai">hello@karma.ai</a>
+            <a href="#">Report Scammer</a>
+            <a href="#">Press Kit</a>
+          </div>
+
+          <div class="footer-col">
+            <h4>Legal</h4>
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Service</a>
+            <a href="#">Cookie Policy</a>
+          </div>
+        </div>
+
+        <div class="footer-bottom">
+          <p>&copy; 2026 Karma. All rights reserved. Made with ❤️ in India.</p>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Scammer Info Modal -->
+    <div class="modal-overlay" id="scammerModal">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h2>
+            <i data-lucide="file-warning" style="width:24px;height:24px"></i>
+            Scammer Intelligence Report
+          </h2>
+          <button class="modal-close" id="modalClose">
+            <i data-lucide="x" style="width:20px;height:20px"></i>
+          </button>
+        </div>
+        <div class="modal-body" id="modalBody"></div>
+      </div>
+    </div>
+
+    <!-- Scroll to Top -->
+    <button class="scroll-top" id="scrollTopBtn" aria-label="Scroll to top">
+      <i data-lucide="chevron-up" style="width:20px;height:20px"></i>
+    </button>
+
+    <script src="script.js"></script>
+  </body>
+</html>

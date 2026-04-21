@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KARMA — Live Intercept</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36'%3E%3Ccircle cx='18' cy='18' r='16' stroke='%23C4F82A' stroke-width='2.5' stroke-dasharray='4 3' fill='none'/%3E%3Cpath d='M18 6V18L26 26' stroke='%23C4F82A' stroke-width='2.5' stroke-linecap='round' fill='none'/%3E%3Ccircle cx='18' cy='18' r='3' fill='%23C4F82A'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <link rel="stylesheet" href="dashboard.css" />
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">
+        <svg width="22" height="22" viewBox="0 0 36 36" fill="none">
+          <circle cx="18" cy="18" r="16" stroke="currentColor" stroke-width="2.5" stroke-dasharray="4 3"/>
+          <path d="M18 6V18L26 26" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="18" cy="18" r="3" fill="currentColor"/>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-name">KARMA <span style="color:var(--accent)">AI</span></div>
+        <div class="brand-sub">INTERCEPT SYSTEM</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="live-calls.html" class="nav-item active">
+        <i data-lucide="radio" class="nav-icon"></i>
+        <span>Live Intercept</span>
+      </a>
+      <a href="analytics.html" class="nav-item">
+        <i data-lucide="bar-chart-2" class="nav-icon"></i>
+        <span>Analytics</span>
+      </a>
+      <a href="archive.html" class="nav-item">
+        <i data-lucide="archive" class="nav-icon"></i>
+        <span>Intelligence Archive</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- ===== MAIN AREA ===== -->
+  <div class="main-area">
+
+    <!-- Top Bar -->
+    <header class="top-bar">
+      <div class="top-bar-left">
+        <h2 class="page-title">Session: <span id="sessionId">ID-8842</span></h2>
+        <span class="threat-tag high" id="threatTag">HIGH THREAT</span>
+      </div>
+      <div class="top-bar-right">
+        <p class="session-meta">Target: Elderly Asset (Protected) &nbsp;|&nbsp; Intercepted <span id="interceptTime">14:22:04</span></p>
+        <button class="gen-btn" id="genSummaryBtn">
+          <i data-lucide="file-text" style="width:14px;height:14px"></i>
+          Generate Interception Summary
+        </button>
+      </div>
+    </header>
+
+    <!-- Content Body -->
+    <div class="content-body">
+
+      <!-- Transcript Panel -->
+      <div class="transcript-panel">
+
+        <!-- Live Session Banner -->
+        <div class="live-entry-banner">
+          <div class="live-entry-left">
+            <div class="live-ring"></div>
+            <div class="live-entry-info">
+              <span class="live-entry-tag">&#9679; LIVE SESSION ACTIVE</span>
+              <span class="live-entry-sub">AI Guardian-V2 is intercepting a scam call</span>
+            </div>
+          </div>
+          <a href="#transcriptFeed" class="live-entry-btn" onclick="document.getElementById('transcriptFeed').scrollTop=document.getElementById('transcriptFeed').scrollHeight;return false;">
+            <i data-lucide="eye" style="width:14px;height:14px"></i>
+            Watch Live
+          </a>
+        </div>
+
+        <div class="transcript-topbar">
+          <span class="transcript-label">LIVE VOICE TRANSCRIPTION</span>
+          <div class="sync-pill">
+            <div class="waveform">
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
+            <span>SYNCING...</span>
+          </div>
+        </div>
+        <div class="transcript-feed" id="transcriptFeed">
+          <!-- Messages injected by JS -->
+        </div>
+      </div>
+
+      <!-- Intel Panel -->
+      <aside class="intel-panel">
+        <div class="intel-section">
+          <div class="intel-section-label">SCAMMER INTEL</div>
+          <div class="intel-row">
+            <div class="intel-key">ORIGIN IP</div>
+            <div class="intel-val" id="originIp">103.24.188.42</div>
+          </div>
+          <div class="intel-row">
+            <div class="intel-key">DEVICE FINGERPRINT</div>
+            <div class="intel-val" id="deviceFp">Android/13-Chrome-119</div>
+          </div>
+          <div class="intel-row">
+            <div class="intel-key">CARRIER INFO</div>
+            <div class="intel-val" id="carrierInfo">Bharti Airtel</div>
+          </div>
+          <div class="intel-row">
+            <div class="intel-key">ESTIMATED LOCATION</div>
+            <div class="intel-val" id="location">Kolkata, India</div>
+          </div>
+        </div>
+
+        <div class="intel-controls">
+          <button class="ctrl-btn mute" id="muteBtn">MUTE AI</button>
+          <button class="ctrl-btn drop" id="dropBtn">DROP CALL</button>
+        </div>
+
+        <div class="intel-status">
+          <div class="status-row">
+            <span class="status-key">SESSION TIME</span>
+            <span class="status-val" id="liveTimer">00:00</span>
+          </div>
+          <div class="status-row" style="margin-top: 12px;">
+            <span class="status-key">AI STATUS</span>
+            <span class="status-val accent" id="aiStatusVal">ACTIVE</span>
+          </div>
+        </div>
+      </aside>
+
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  lucide.createIcons();
+
+  // ── DOM References ─────────────────────────────────────
+  const feed = document.getElementById('transcriptFeed');
+  const aiStatusVal = document.getElementById('aiStatusVal');
+  const muteBtn = document.getElementById('muteBtn');
+  const dropBtn = document.getElementById('dropBtn');
+  const timerEl = document.getElementById('liveTimer');
+  const sessionIdEl = document.getElementById('sessionId');
+  const threatTag = document.getElementById('threatTag');
+  const syncPill = document.querySelector('.sync-pill span');
+  const liveBanner = document.querySelector('.live-entry-tag');
+  const genBtn = document.getElementById('genSummaryBtn');
+
+  let muted = false;
+  let activeCallSid = null;
+  let timerInterval = null;
+  let callStartTime = null;
+  let connected = false;
+
+  // ── Socket.IO Connection ───────────────────────────────
+  const BACKEND_URL = window.location.origin;
+  const socket = io(BACKEND_URL, {
+    transports: ['websocket', 'polling'],
+    query: { role: 'dashboard' }
+  });
+
+  socket.on('connect', () => {
+    connected = true;
+    syncPill.textContent = 'CONNECTED';
+    console.log('[SIO] Connected to backend');
+  });
+
+  socket.on('disconnect', () => {
+    connected = false;
+    syncPill.textContent = 'DISCONNECTED';
+    console.log('[SIO] Disconnected');
+  });
+
+  // ── Call Lifecycle ─────────────────────────────────────
+  socket.on('call_started', (data) => {
+    activeCallSid = data.call_sid;
+    sessionIdEl.textContent = data.call_sid;
+    document.getElementById('interceptTime').textContent =
+      new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+    // Clear old transcript
+    feed.innerHTML = '';
+    callStartTime = Date.now();
+    liveBanner.innerHTML = '&#9679; LIVE SESSION ACTIVE';
+    liveBanner.style.color = '';
+    threatTag.textContent = 'HIGH THREAT';
+    threatTag.style.display = '';
+
+    // Start timer
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      const secs = Math.floor((Date.now() - callStartTime) / 1000);
+      timerEl.textContent = `${String(Math.floor(secs / 60)).padStart(2, '0')}:${String(secs % 60).padStart(2, '0')}`;
+    }, 1000);
+
+    console.log('[CALL] Started:', data);
+  });
+
+  socket.on('call_ended', (data) => {
+    activeCallSid = null;
+    if (timerInterval) clearInterval(timerInterval);
+    liveBanner.innerHTML = '&#9679; SESSION ENDED';
+    liveBanner.style.color = 'var(--red)';
+    aiStatusVal.textContent = 'OFFLINE';
+    aiStatusVal.style.color = 'var(--text-dim)';
+    console.log('[CALL] Ended:', data);
+  });
+
+  // ── Transcript Messages ────────────────────────────────
+  socket.on('transcript_message', (data) => {
+    const isScammer = data.speaker === 'scammer';
+    const s = isScammer ? 'scammer' : 'ai';
+    const label = isScammer ? 'SCAMMER' : 'AI PERSONA (SHAKUNTALA DEVI)';
+    const text = data.text;
+
+    const div = document.createElement('div');
+    div.className = `msg msg-${s}`;
+    div.innerHTML = `<div class="msg-label">${label}</div><div class="msg-bubble">${escapeHtml(text)}</div>`;
+    feed.appendChild(div);
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      div.classList.add('visible');
+      feed.scrollTop = feed.scrollHeight;
+    }));
+  });
+
+  // ── AI Status ──────────────────────────────────────────
+  socket.on('ai_status', (data) => {
+    aiStatusVal.textContent = data.status;
+    if (data.status === 'ANALYZING...') {
+      aiStatusVal.style.color = 'var(--orange)';
+    } else if (data.status === 'DEFENDING') {
+      aiStatusVal.style.color = 'var(--accent)';
+    } else {
+      aiStatusVal.style.color = 'var(--accent)';
+    }
+  });
+
+  // ── Intel Updates ──────────────────────────────────────
+  socket.on('intel_update', (data) => {
+    if (data.scammer_name) document.getElementById('originIp').textContent = data.scammer_name;
+    if (data.location) document.getElementById('location').textContent = data.location;
+    if (data.scam_type) document.getElementById('deviceFp').textContent = data.scam_type;
+    if (data.organization_claimed) document.getElementById('carrierInfo').textContent = data.organization_claimed;
+
+    // Update intel labels dynamically
+    const keys = document.querySelectorAll('.intel-key');
+    if (data.scammer_name && keys[0]) keys[0].textContent = 'SCAMMER NAME';
+    if (data.scam_type && keys[1]) keys[1].textContent = 'SCAM TYPE';
+    if (data.organization_claimed && keys[2]) keys[2].textContent = 'CLAIMS TO BE';
+  });
+
+  // ── Controls ───────────────────────────────────────────
+  muteBtn.addEventListener('click', () => {
+    muted = !muted;
+    muteBtn.textContent = muted ? 'UNMUTE AI' : 'MUTE AI';
+    muteBtn.style.borderColor = muted ? 'rgba(248,81,73,0.5)' : '';
+    muteBtn.style.color = muted ? 'var(--red)' : '';
+    socket.emit('mute_ai', { call_sid: activeCallSid, muted });
+  });
+
+  dropBtn.addEventListener('click', () => {
+    if (!confirm('Terminate interception session?')) return;
+    if (activeCallSid) {
+      socket.emit('drop_call', { call_sid: activeCallSid });
+    }
+  });
+
+  // Summary btn — calls /api/calls/<id>/summary
+  genBtn.addEventListener('click', () => {
+    if (!activeCallSid) {
+      genBtn.textContent = 'No active session';
+      setTimeout(() => { genBtn.innerHTML = '<i data-lucide="file-text" style="width:14px;height:14px"></i> Generate Interception Summary'; lucide.createIcons(); }, 2000);
+      return;
+    }
+    genBtn.innerHTML = '<i data-lucide="loader" style="width:14px;height:14px"></i> Generating...';
+    genBtn.style.opacity = '0.7';
+    lucide.createIcons();
+
+    fetch(BACKEND_URL + '/api/calls/' + activeCallSid + '/summary')
+      .then(r => r.json())
+      .then(data => {
+        genBtn.innerHTML = '<i data-lucide="check" style="width:14px;height:14px"></i> Summary Ready';
+        genBtn.style.opacity = '1';
+        lucide.createIcons();
+        // Show summary in transcript feed
+        if (data.summary) {
+          const div = document.createElement('div');
+          div.className = 'msg msg-ai';
+          div.innerHTML = `<div class="msg-label" style="color:var(--accent)">AI SUMMARY</div><div class="msg-bubble" style="background:rgba(61,220,132,0.06);border:1px solid rgba(61,220,132,0.2);white-space:pre-wrap;font-size:12px;">${escapeHtml(data.summary)}</div>`;
+          feed.appendChild(div);
+          requestAnimationFrame(() => requestAnimationFrame(() => { div.classList.add('visible'); feed.scrollTop = feed.scrollHeight; }));
+        }
+      })
+      .catch(() => {
+        genBtn.innerHTML = '<i data-lucide="x" style="width:14px;height:14px"></i> Error';
+        genBtn.style.opacity = '1';
+        lucide.createIcons();
+        setTimeout(() => { genBtn.innerHTML = '<i data-lucide="file-text" style="width:14px;height:14px"></i> Generate Interception Summary'; lucide.createIcons(); }, 2000);
+      });
+  });
+
+  // ── Demo Fallback ──────────────────────────────────────
+  // If no backend connection after 3 seconds, run demo mode
+  setTimeout(() => {
+    if (!connected || !activeCallSid) {
+      runDemoMode();
+    }
+  }, 3000);
+
+  function runDemoMode() {
+    sessionIdEl.textContent = 'DEMO-MODE';
+    liveBanner.innerHTML = '&#9679; DEMO MODE (no backend)';
+    threatTag.textContent = 'DEMO';
+    threatTag.style.background = 'rgba(88,166,255,0.1)';
+    threatTag.style.color = '#58a6ff';
+    threatTag.style.borderColor = 'rgba(88,166,255,0.3)';
+
+    const scenario = [
+      { s: 'scammer', label: 'SCAMMER', text: 'Hello madam, I am calling from State Bank regarding your KYC update. Your account will be blocked in 2 hours.' },
+      { s: 'ai', label: 'AI PERSONA (SHAKUNTALA DEVI)', text: 'Arre beta! KYC? Yeh kya hota hai? Mera Rahul bolta hai bank kabhi phone nahi karta...' },
+      { s: 'scammer', label: 'SCAMMER', text: 'Madam this is urgent! Give me your Aadhaar number and OTP immediately!' },
+      { s: 'ai', label: 'AI PERSONA (SHAKUNTALA DEVI)', text: 'Aadhaar... haan haan, ruko na beta. Chasma dhoondh rahi hoon. Drawer mein tha ya almirah mein...' },
+      { s: 'scammer', label: 'SCAMMER', text: 'MADAM PLEASE HURRY! Your account will be frozen!' },
+      { s: 'ai', label: 'AI PERSONA (SHAKUNTALA DEVI)', text: 'Arre itna gussa kyun karte ho? Khana khaya tumne? Awaz se lagta hai bhookhe ho...' },
+      { s: 'scammer', label: 'SCAMMER', text: 'I am not hungry! Just give me the OTP that came on your phone!' },
+      { s: 'ai', label: 'AI PERSONA (SHAKUNTALA DEVI)', text: 'Phone? Woh toh Rahul ke room mein charge pe laga hai. Ruko abhi laati hoon... oh meri kamar...' },
+    ];
+
+    let step = 0;
+    let secs = 0;
+
+    callStartTime = Date.now();
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      secs++;
+      timerEl.textContent = `${String(Math.floor(secs / 60)).padStart(2, '0')}:${String(secs % 60).padStart(2, '0')}`;
+    }, 1000);
+
+    document.getElementById('interceptTime').textContent =
+      new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+    function addDemoMsg(item) {
+      const div = document.createElement('div');
+      div.className = `msg msg-${item.s}`;
+      div.innerHTML = `<div class="msg-label">${item.label}</div><div class="msg-bubble">${item.text}</div>`;
+      feed.appendChild(div);
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        div.classList.add('visible');
+        feed.scrollTop = feed.scrollHeight;
+      }));
+      aiStatusVal.textContent = item.s === 'scammer' ? 'ANALYZING...' : 'DEFENDING';
+      aiStatusVal.style.color = item.s === 'scammer' ? 'var(--orange)' : 'var(--accent)';
+    }
+
+    function demoLoop() {
+      if (activeCallSid) return; // Real call took over
+      if (step < scenario.length) {
+        addDemoMsg(scenario[step]);
+        const delay = scenario[step].s === 'ai' ? 3500 : 2200;
+        step++;
+        setTimeout(demoLoop, delay);
+      } else {
+        setTimeout(() => {
+          addDemoMsg({ s: 'ai', label: 'AI PERSONA (SHAKUNTALA DEVI)', text: 'Arre beta, sun rahe ho? Line kharab aa rahi hai...' });
+          step = Math.max(0, step - 2);
+          setTimeout(demoLoop, 4000);
+        }, 5000);
+      }
+    }
+    setTimeout(demoLoop, 1500);
+  }
+
+  // ── Utility ────────────────────────────────────────────
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  // ── GSAP Animations ────────────────────────────────────
+  gsap.from('.sidebar', { x: -40, opacity: 0, duration: 0.6, ease: 'power3.out' });
+  gsap.from('.top-bar', { y: -20, opacity: 0, duration: 0.5, delay: 0.1, ease: 'power2.out' });
+  gsap.from('.intel-panel', { x: 40, opacity: 0, duration: 0.6, delay: 0.15, ease: 'power3.out' });
+});
+</script>
+</body>
+</html>

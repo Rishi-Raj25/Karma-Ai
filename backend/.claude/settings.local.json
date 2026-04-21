@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:docs.sarvam.ai)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:support.exotel.com)",
+      "WebFetch(domain:developer.exotel.com)",
+      "WebFetch(domain:exotel.com)",
+      "WebFetch(domain:docs.exotel.com)",
+      "WebFetch(domain:exotelapi.docs.apiary.io)"
+    ]
+  }
+}
