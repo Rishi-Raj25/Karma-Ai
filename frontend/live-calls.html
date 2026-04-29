@@ -317,9 +317,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // If no backend connection after 3 seconds, run demo mode
   setTimeout(() => {
     if (!connected || !activeCallSid) {
-      runDemoMode();
+      sessionIdEl.textContent = 'WAITING';
+      liveBanner.innerHTML = '&#9679; WAITING FOR INTERCEPT';
+      liveBanner.style.color = '#888';
+      threatTag.style.display = 'none';
+      document.querySelector('.live-entry-sub').textContent = 'System is armed and waiting for incoming call...';
     }
-  }, 3000);
+  }, 1000);
 
   function runDemoMode() {
     sessionIdEl.textContent = 'DEMO-MODE';

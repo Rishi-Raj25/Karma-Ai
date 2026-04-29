@@ -63,7 +63,7 @@ def text_to_speech(
         "model": "bulbul:v3",
         "speaker": speaker,
         "speech_sample_rate": sample_rate,
-        "pace": 1.15,
+        "pace": 1.0,
     }
 
     resp = _session.post(url, json=payload, headers={
