@@ -70,7 +70,7 @@ os.makedirs(RECORDINGS_DIR, exist_ok=True)
 
 BASE_URL = os.getenv("BASE_URL", "http://localhost:5000")
 
-FRONTEND_DIR = os.path.join(os.path.dirname(__file__), "..", "frontend")
+FRONTEND_DIR = os.path.join(os.path.dirname(__file__), "..")
 
 # Initialize database
 init_db()
