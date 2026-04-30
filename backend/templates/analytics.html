@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <link rel="stylesheet" href="dashboard.css" />
+  <link rel="stylesheet" href="/static/dashboard.css" />
   <style>
     .alert-bar { display:flex; align-items:center; gap:16px; background:var(--bg-card); border:1px solid var(--border); border-left:3px solid var(--orange); border-radius:var(--radius); padding:16px 20px; margin-bottom:24px; }
     .alert-icon { width:40px;height:40px; background:rgba(227,179,65,0.12); border:1px solid rgba(227,179,65,0.3); border-radius:10px; display:flex;align-items:center;justify-content:center; color:var(--orange); flex-shrink:0; }
@@ -96,6 +96,7 @@
         <div class="chart-header"><div class="chart-title"><i data-lucide="pie-chart" style="width:16px;height:16px;color:var(--accent)"></i>Success Rate</div></div>
         <div class="donut-wrap">
           <div style="position:relative;width:140px;height:140px;">
+            <img src="/static/logo.png" alt="Karma AI" style="height:32px">
             <svg viewBox="0 0 140 140" style="width:140px;height:140px;">
               <defs><filter id="glow"><feGaussianBlur stdDeviation="3" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
               <circle cx="70" cy="70" r="54" fill="none" stroke="var(--bg-elevated)" stroke-width="14"/>
