@@ -4,11 +4,12 @@
     "frontend": {
       "entrypoint": "frontend",
       "routePrefix": "/",
-      "framework": "other"
+      "builder": "@vercel/static"
     },
     "backend": {
-      "entrypoint": "backend",
-      "routePrefix": "/api"
+      "entrypoint": "backend/app.py",
+      "routePrefix": "/api",
+      "framework": "flask"
     }
   }
 }
