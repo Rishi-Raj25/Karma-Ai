@@ -70,7 +70,7 @@ os.makedirs(RECORDINGS_DIR, exist_ok=True)
 
 BASE_URL = os.getenv("BASE_URL", "http://localhost:5000")
 
-FRONTEND_DIR = os.path.join(os.path.dirname(__file__), "..")
+# Flask will now serve templates from 'templates' and assets from 'static' automatically.
 
 # Initialize database
 init_db()
@@ -614,9 +614,7 @@ def call_status():
 
 @app.route("/")
 def index():
-    """Serve the web voice-call interface."""
-    if MODE not in ("web", "both"):
-        return "Web mode not enabled. Set MODE=web or MODE=both in .env", 404
+    """Serve the web interface homepage."""
     return render_template("index.html")
 
 
@@ -707,8 +705,10 @@ def api_active_calls():
 @app.route("/dashboard/")
 @app.route("/dashboard/<path:filename>")
 def serve_frontend(filename="index.html"):
-    """Serve frontend files from the frontend directory."""
-    return send_from_directory(FRONTEND_DIR, filename)
+    """Serve frontend files using Flask's template engine."""
+    if filename.endswith(".html"):
+        return render_template(filename)
+    return send_from_directory("static", filename)
 
 
 # ===================================================================

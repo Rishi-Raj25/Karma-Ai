@@ -1,645 +1,650 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Karma AI - Reverse Scam Agent</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Karma — AI That Fights Scammers</title>
+    <meta name="description" content="Karma uses AI to waste scammers' time, protecting real people. An intelligent defense system that intercepts fraud calls and keeps scammers busy." />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36'%3E%3Ccircle cx='18' cy='18' r='16' stroke='%23C4F82A' stroke-width='2.5' stroke-dasharray='4 3' fill='none'/%3E%3Cpath d='M18 6V18L26 26' stroke='%23C4F82A' stroke-width='2.5' stroke-linecap='round' fill='none'/%3E%3Ccircle cx='18' cy='18' r='3' fill='%23C4F82A'/%3E%3C/svg%3E" />
 
-        body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: #0a0a12;
-            color: #e0e0e8;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            overflow: hidden;
-        }
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
-        /* ---- Header ---- */
-        .header {
-            text-align: center;
-            padding: 24px 16px 12px;
-            width: 100%;
-        }
-        .header h1 {
-            font-size: 1.6rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #ff6b35, #f7c948);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .header p {
-            color: #888;
-            font-size: 0.85rem;
-            margin-top: 4px;
-        }
-        .mode-badge {
-            display: inline-block;
-            padding: 2px 10px;
-            border-radius: 12px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-top: 6px;
-        }
-        .mode-badge.idle { background: #2a2a3a; color: #888; }
-        .mode-badge.connected { background: #1a3a2a; color: #4ecca3; }
-        .mode-badge.recording { background: #3a1a1a; color: #e94560; }
-        .mode-badge.processing { background: #2a2a1a; color: #f7c948; }
-        .mode-badge.speaking { background: #1a2a3a; color: #6bc5f7; }
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 
-        /* ---- Transcript ---- */
-        .transcript-area {
-            flex: 1;
-            width: 100%;
-            max-width: 540px;
-            padding: 12px 16px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            scroll-behavior: smooth;
-        }
-        .msg {
-            max-width: 85%;
-            padding: 10px 14px;
-            border-radius: 16px;
-            font-size: 0.9rem;
-            line-height: 1.45;
-            animation: fadeIn 0.3s ease;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-        .msg.user {
-            align-self: flex-end;
-            background: #1e3a5f;
-            color: #c8ddf5;
-            border-bottom-right-radius: 4px;
-        }
-        .msg.assistant {
-            align-self: flex-start;
-            background: #2a1f3d;
-            color: #dcc8f5;
-            border-bottom-left-radius: 4px;
-        }
-        .msg .label {
-            font-size: 0.7rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 3px;
-            opacity: 0.7;
-        }
-        .msg.user .label { color: #6bc5f7; }
-        .msg.assistant .label { color: #c084fc; }
+    <!-- GSAP + ScrollTrigger -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/TextPlugin.min.js"></script>
 
-        .system-msg {
-            text-align: center;
-            font-size: 0.78rem;
-            color: #666;
-            padding: 6px;
-            font-style: italic;
-        }
-
-        /* ---- Processing indicator ---- */
-        .processing-indicator {
-            display: none;
-            align-self: flex-start;
-            padding: 10px 16px;
-            border-radius: 16px;
-            background: #1a1a2e;
-            border: 1px solid #2a2a3e;
-        }
-        .processing-indicator.visible { display: flex; align-items: center; gap: 10px; }
-        .processing-dots span {
-            display: inline-block;
-            width: 7px; height: 7px;
-            border-radius: 50%;
-            background: #f7c948;
-            animation: bounce 1.2s infinite;
-        }
-        .processing-dots span:nth-child(2) { animation-delay: 0.15s; }
-        .processing-dots span:nth-child(3) { animation-delay: 0.3s; }
-        @keyframes bounce {
-            0%, 60%, 100% { transform: translateY(0); }
-            30% { transform: translateY(-8px); }
-        }
-        .processing-text {
-            font-size: 0.8rem;
-            color: #f7c948;
-        }
-
-        /* ---- Controls ---- */
-        .controls {
-            width: 100%;
-            max-width: 540px;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-        }
-
-        /* Start / End call buttons */
-        .call-btn {
-            width: 72px; height: 72px;
-            border-radius: 50%;
-            border: none;
-            cursor: pointer;
-            font-size: 1.8rem;
-            transition: all 0.25s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-        }
-        .call-btn:hover { transform: scale(1.08); }
-        .call-btn:active { transform: scale(0.95); }
-
-        .call-btn.start {
-            background: linear-gradient(135deg, #2ecc71, #27ae60);
-            color: white;
-        }
-        .call-btn.end {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
-            color: white;
-        }
-        .call-btn:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        /* Push-to-talk mic button */
-        .mic-area {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            width: 100%;
-        }
-        .mic-area.visible { display: flex; }
-
-        .mic-btn {
-            width: 64px; height: 64px;
-            border-radius: 50%;
-            border: 3px solid #444;
-            background: #1a1a2e;
-            color: #e0e0e8;
-            font-size: 1.6rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            user-select: none;
-            -webkit-user-select: none;
-        }
-        .mic-btn:hover { border-color: #666; }
-        .mic-btn.recording {
-            border-color: #e94560;
-            background: #2a0a0f;
-            color: #e94560;
-            animation: mic-pulse 1.5s infinite;
-        }
-        .mic-btn:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-            animation: none;
-        }
-        @keyframes mic-pulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(233,69,96,0.5); }
-            50%      { box-shadow: 0 0 0 16px rgba(233,69,96,0); }
-        }
-
-        .mic-hint {
-            font-size: 0.75rem;
-            color: #666;
-        }
-
-        .btn-row {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        /* ---- Misc ---- */
-        .hidden { display: none !important; }
-
-        /* Scrollbar */
-        .transcript-area::-webkit-scrollbar { width: 4px; }
-        .transcript-area::-webkit-scrollbar-track { background: transparent; }
-        .transcript-area::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
-
-        /* Mobile */
-        @media (max-width: 600px) {
-            .header h1 { font-size: 1.3rem; }
-            .transcript-area { padding: 10px 12px; }
-            .msg { font-size: 0.85rem; }
-        }
-    </style>
-</head>
-<body>
-
-<div class="header">
-    <h1>Karma AI</h1>
-    <p>Reverse Scam Voice Agent</p>
-    <div id="statusBadge" class="mode-badge idle">Disconnected</div>
-</div>
-
-<div class="transcript-area" id="transcript">
-    <div class="system-msg">Click the green button to start a call with Karma AI Dadi</div>
-</div>
-
-<div class="processing-indicator" id="processingIndicator">
-    <div class="processing-dots"><span></span><span></span><span></span></div>
-    <span class="processing-text" id="processingText">Processing...</span>
-</div>
-
-<div class="controls">
-    <!-- Before call: Start button -->
-    <div id="startArea">
-        <button class="call-btn start" id="startBtn" title="Start Call">&#128222;</button>
-    </div>
-
-    <!-- During call: Mic + End -->
-    <div class="mic-area" id="micArea">
-        <div class="btn-row">
-            <button class="mic-btn" id="micBtn" title="Hold to talk" disabled>&#127908;</button>
-            <button class="call-btn end" id="endBtn" title="End Call" style="width:52px;height:52px;font-size:1.3rem;">&#128308;</button>
+    <link rel="stylesheet" href="/static/style.css">
+  </head>
+  <body>
+    <!-- Preloader -->
+    <div class="preloader" id="preloader">
+      <div class="preloader-inner">
+        <div class="preloader-logo">
+          <svg width="60" height="60" viewBox="0 0 36 36" fill="none">
+            <circle cx="18" cy="18" r="16" stroke="#C4F82A" stroke-width="2.5" stroke-dasharray="4 3" class="preloader-circle"/>
+            <path d="M18 6V18L26 26" stroke="#C4F82A" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="18" cy="18" r="3" fill="#C4F82A"/>
+          </svg>
         </div>
-        <span class="mic-hint" id="micHint">Hold the mic button to talk</span>
+        <div class="preloader-text">KARMA</div>
+        <div class="preloader-bar">
+          <div class="preloader-bar-fill" id="preloaderBar"></div>
+        </div>
+        <div class="preloader-status" id="preloaderStatus">Initializing defense system...</div>
+      </div>
     </div>
-</div>
 
-<!-- Audio element for playback -->
-<audio id="audioPlayer"></audio>
+    <!-- Cursor Ball -->
+    <div class="cursor-ball" id="cursorBall"></div>
+    <div class="cursor-ring" id="cursorRing"></div>
 
-<!-- Socket.IO client (served by Flask-SocketIO) -->
-<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <!-- Navbar -->
+    <nav class="navbar" id="navbar">
+      <div class="nav-inner">
+        <a href="#home" class="logo">
+          <div class="logo-icon">
+            <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+              <circle cx="18" cy="18" r="16" stroke="currentColor" stroke-width="2.5" stroke-dasharray="4 3"/>
+              <path d="M18 6V18L26 26" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+              <circle cx="18" cy="18" r="3" fill="currentColor"/>
+            </svg>
+          </div>
+          <span class="logo-text">KARMA</span>
+        </a>
 
-<script>
-// =====================================================================
-//  State
-// =====================================================================
-let socket = null;
-let audioContext = null;
-let mediaStream = null;
-let scriptProcessor = null;
-let sourceNode = null;
-let isRecording = false;
-let audioChunks = [];
-let isPlaying = false;
+        <div class="nav-links" id="navLinks">
+          <a href="#home" class="nav-link active">Home</a>
+          <a href="#how-it-works" class="nav-link">How It Works</a>
+          <a href="#stats" class="nav-link">Impact</a>
+          <a href="live-calls.html" class="nav-link">Live Dashboard</a>
+          <a href="#features" class="nav-link">Features</a>
+        </div>
 
-const SAMPLE_RATE = 16000;
+        <div class="nav-actions">
+          <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+        </div>
+      </div>
+    </nav>
 
-// DOM refs
-const startBtn     = document.getElementById('startBtn');
-const startArea    = document.getElementById('startArea');
-const micArea      = document.getElementById('micArea');
-const micBtn       = document.getElementById('micBtn');
-const micHint      = document.getElementById('micHint');
-const endBtn       = document.getElementById('endBtn');
-const transcript   = document.getElementById('transcript');
-const statusBadge  = document.getElementById('statusBadge');
-const processing   = document.getElementById('processingIndicator');
-const procText     = document.getElementById('processingText');
-const audioPlayer  = document.getElementById('audioPlayer');
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+      <div class="hero-particles" id="heroParticles"></div>
+      <div class="hero-gradient"></div>
+      <div class="hero-grid-bg"></div>
+      <div class="hero-confetti" id="heroConfetti"></div>
 
-// =====================================================================
-//  UI helpers
-// =====================================================================
-function setStatus(state, text) {
-    statusBadge.className = 'mode-badge ' + state;
-    statusBadge.textContent = text;
-}
+      <div class="hero-content">
+        <div class="hero-badge" id="heroBadge">
+          <span class="badge-pulse"></span>
+          <i data-lucide="shield-check" style="width:16px;height:16px"></i>
+          <span>Scam Defense System</span>
+        </div>
 
-function addMessage(role, text) {
-    const div = document.createElement('div');
-    div.className = 'msg ' + role;
-    const label = role === 'user' ? 'You (Scammer)' : 'Karma AI Dadi';
-    div.innerHTML = `<div class="label">${label}</div>${text}`;
-    transcript.appendChild(div);
-    transcript.scrollTop = transcript.scrollHeight;
-}
+        <p class="hero-tagline-hindi" id="heroTagline">"Beta, tumse na ho payega."</p>
 
-function addSystemMsg(text) {
-    const div = document.createElement('div');
-    div.className = 'system-msg';
-    div.textContent = text;
-    transcript.appendChild(div);
-    transcript.scrollTop = transcript.scrollHeight;
-}
+        <!-- Energy Orb Visual Centerpiece -->
+        <div class="hero-orb-container">
+          <div class="hero-orb">
+            <div class="orb-core"></div>
+            <div class="orb-ring orb-ring-1"></div>
+            <div class="orb-ring orb-ring-2"></div>
+            <div class="orb-ring orb-ring-3"></div>
+            <div class="orb-pulse"></div>
+          </div>
 
-function showProcessing(stage) {
-    const labels = {
-        stt: 'Transcribing speech...',
-        thinking: 'Dadi is thinking...',
-        tts: 'Generating voice...',
-    };
-    procText.textContent = labels[stage] || 'Processing...';
-    processing.classList.add('visible');
-}
+          <h1 class="hero-title" id="heroTitle">
+            <span class="title-line">
+              <span class="title-word" data-delay="0">K</span><span class="title-word" data-delay="0.05">A</span><span class="title-word" data-delay="0.1">R</span><span class="title-word" data-delay="0.15">M</span><span class="title-word" data-delay="0.2">A</span>
+            </span>
+          </h1>
+        </div>
 
-function hideProcessing() {
-    processing.classList.remove('visible');
-}
+        <div class="hero-subtitle-block">
+          <p class="hero-subtitle" id="heroSubtitle">The AI That Wastes Scammers' Time<span class="typewriter-cursor">|</span></p>
+          <p class="hero-desc" id="heroDesc">What Goes Around, Comes Around</p>
+        </div>
 
-// =====================================================================
-//  WAV encoder (float32 PCM -> 16-bit WAV)
-// =====================================================================
-function encodeWAV(chunks, sampleRate) {
-    // Merge all float32 chunks
-    let totalLen = 0;
-    for (const c of chunks) totalLen += c.length;
-    const merged = new Float32Array(totalLen);
-    let offset = 0;
-    for (const c of chunks) { merged.set(c, offset); offset += c.length; }
+        <div class="hero-metrics">
+          <div class="metric">
+            <span class="metric-value" data-target="15420">0</span>
+            <span class="metric-label">Hours Wasted</span>
+          </div>
+          <div class="metric-divider"></div>
+          <div class="metric">
+            <span class="metric-value" data-target="8734">0</span>
+            <span class="metric-label">Scams Blocked</span>
+          </div>
+          <div class="metric-divider"></div>
+          <div class="metric">
+            <span class="metric-value" data-target="24" data-prefix="₹" data-suffix="L+">0</span>
+            <span class="metric-label">Money Saved</span>
+          </div>
+        </div>
 
-    // Float32 -> Int16
-    const pcm = new Int16Array(merged.length);
-    for (let i = 0; i < merged.length; i++) {
-        const s = Math.max(-1, Math.min(1, merged[i]));
-        pcm[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
-    }
+        <div class="hero-actions">
+          <a href="live-calls.html" class="btn-primary" id="watchDemoBtn">
+            <i data-lucide="play-circle" style="width:20px;height:20px"></i>
+            <span>Watch Demo</span>
+          </a>
+          <a href="#how-it-works" class="btn-outline">
+            <span>How It Works</span>
+            <i data-lucide="chevron-down" style="width:18px;height:18px"></i>
+          </a>
+        </div>
+      </div>
 
-    // Build WAV
-    const buffer = new ArrayBuffer(44 + pcm.length * 2);
-    const view = new DataView(buffer);
+      <div class="scroll-indicator" id="scrollIndicator">
+        <div class="scroll-mouse">
+          <div class="scroll-wheel"></div>
+        </div>
+        <span class="scroll-text">Scroll to explore</span>
+      </div>
+    </section>
 
-    function writeStr(offset, str) {
-        for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
-    }
+    <!-- How It Works -->
+    <section class="section how-it-works" id="how-it-works">
+      <div class="section-wipe"></div>
+      <div class="section-confetti" data-confetti-section></div>
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag"><i data-lucide="zap" style="width:14px;height:14px"></i> Process</span>
+          <h2 class="section-title">How <span class="highlight">Karma</span> Works</h2>
+          <p class="section-desc">Four simple steps to outsmart scammers</p>
+        </div>
 
-    writeStr(0, 'RIFF');
-    view.setUint32(4, 36 + pcm.length * 2, true);
-    writeStr(8, 'WAVE');
-    writeStr(12, 'fmt ');
-    view.setUint32(16, 16, true);           // fmt chunk size
-    view.setUint16(20, 1, true);            // PCM
-    view.setUint16(22, 1, true);            // mono
-    view.setUint32(24, sampleRate, true);   // sample rate
-    view.setUint32(28, sampleRate * 2, true); // byte rate
-    view.setUint16(32, 2, true);            // block align
-    view.setUint16(34, 16, true);           // bits per sample
-    writeStr(36, 'data');
-    view.setUint32(40, pcm.length * 2, true);
+        <div class="steps-timeline">
+          <div class="timeline-line"></div>
 
-    // Write samples
-    let pos = 44;
-    for (let i = 0; i < pcm.length; i++) {
-        view.setInt16(pos, pcm[i], true);
-        pos += 2;
-    }
+          <div class="step" data-step="01">
+            <div class="step-marker">
+              <div class="step-number">01</div>
+              <div class="step-icon-wrap">
+                <i data-lucide="scan-search" style="width:28px;height:28px"></i>
+              </div>
+            </div>
+            <div class="step-content">
+              <h3>Scammer Detection</h3>
+              <p>Our AI analyzes incoming calls in real-time, identifying scam patterns, suspicious keywords, and known fraud tactics using advanced machine learning.</p>
+            </div>
+          </div>
 
-    return new Blob([buffer], { type: 'audio/wav' });
-}
+          <div class="step" data-step="02">
+            <div class="step-marker">
+              <div class="step-number">02</div>
+              <div class="step-icon-wrap">
+                <i data-lucide="user-round-check" style="width:28px;height:28px"></i>
+              </div>
+            </div>
+            <div class="step-content">
+              <h3>AI "Granny" Takes Over</h3>
+              <p>Once detected, our AI persona — a sweet, confused elderly woman — engages the scammer in conversation, keeping them occupied and away from real victims.</p>
+            </div>
+          </div>
 
-// =====================================================================
-//  Audio recording (mic capture)
-// =====================================================================
-async function initMic() {
-    try {
-        mediaStream = await navigator.mediaDevices.getUserMedia({
-            audio: {
-                sampleRate: SAMPLE_RATE,
-                channelCount: 1,
-                echoCancellation: true,
-                noiseSuppression: true,
-                autoGainControl: true,
+          <div class="step" data-step="03">
+            <div class="step-marker">
+              <div class="step-number">03</div>
+              <div class="step-icon-wrap">
+                <i data-lucide="timer" style="width:28px;height:28px"></i>
+              </div>
+            </div>
+            <div class="step-content">
+              <h3>Time Wasting Tactics</h3>
+              <p>Granny asks them to repeat, claims hearing problems, goes on tangents about her grandchildren, and creates realistic delays that frustrate scammers.</p>
+            </div>
+          </div>
+
+          <div class="step" data-step="04">
+            <div class="step-marker">
+              <div class="step-number">04</div>
+              <div class="step-icon-wrap">
+                <i data-lucide="database" style="width:28px;height:28px"></i>
+              </div>
+            </div>
+            <div class="step-content">
+              <h3>Data Collection &amp; Reporting</h3>
+              <p>While keeping them busy, we gather intelligence: phone numbers, scripts, tactics, and locations. This data is shared with authorities to shut down operations.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="section stats-section" id="stats">
+      <div class="section-wipe"></div>
+      <div class="section-confetti" data-confetti-section></div>
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag"><i data-lucide="bar-chart-3" style="width:14px;height:14px"></i> Impact</span>
+          <h2 class="section-title">Impact in <span class="highlight">Numbers</span></h2>
+          <p class="section-desc">Real results from real scam interceptions</p>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon-bg">
+              <i data-lucide="clock" style="width:32px;height:32px"></i>
+            </div>
+            <div class="stat-number" data-target="15420">0</div>
+            <div class="stat-label">Hours of Scammer<br/>Time Wasted</div>
+            <div class="stat-bar"><div class="stat-bar-fill" style="--fill-width: 87%"></div></div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon-bg">
+              <i data-lucide="shield-off" style="width:32px;height:32px"></i>
+            </div>
+            <div class="stat-number" data-target="8734">0</div>
+            <div class="stat-label">Scam Calls<br/>Intercepted</div>
+            <div class="stat-bar"><div class="stat-bar-fill" style="--fill-width: 72%"></div></div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon-bg">
+              <i data-lucide="users" style="width:32px;height:32px"></i>
+            </div>
+            <div class="stat-number" data-target="12589">0</div>
+            <div class="stat-label">People<br/>Protected</div>
+            <div class="stat-bar"><div class="stat-bar-fill" style="--fill-width: 95%"></div></div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon-bg">
+              <i data-lucide="indian-rupee" style="width:32px;height:32px"></i>
+            </div>
+            <div class="stat-number" data-target="2400000" data-prefix="₹">0</div>
+            <div class="stat-label">Money<br/>Saved</div>
+            <div class="stat-bar"><div class="stat-bar-fill" style="--fill-width: 68%"></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Live Dashboard CTA Section -->
+    <section class="section live-dash-section" id="live-dashboard">
+      <!-- Background layers -->
+      <div class="ldc-grid-bg"></div>
+      <div class="ldc-glow ldc-glow-1"></div>
+      <div class="ldc-glow ldc-glow-2"></div>
+      <canvas class="ldc-particles" id="ldcParticles"></canvas>
+      <div class="ldc-scanlines"></div>
+
+      <div class="container" style="max-width:960px;position:relative;z-index:2;">
+        <div class="live-cta-card" id="ldcCard">
+          <div class="live-cta-left">
+            <div class="live-cta-badge" id="ldcBadge">
+              <span class="live-cta-dot"></span>
+              LIVE NOW
+            </div>
+            <h2 class="live-cta-title" id="ldcTitle">Watch AI Intercept a Scammer <span class="highlight">in Real Time</span></h2>
+            <p class="live-cta-desc" id="ldcDesc">Our AI persona is actively engaged with a scammer right now. Open the live dashboard to watch the full transcript, session intel, and call controls.</p>
+            <div class="live-cta-actions" id="ldcActions">
+              <a href="live-calls.html" class="btn-primary" style="display:inline-flex;align-items:center;gap:10px;">
+                <i data-lucide="radio" style="width:18px;height:18px"></i>
+                Open Live Dashboard
+              </a>
+              <a href="archive.html" class="btn-outline" style="display:inline-flex;align-items:center;gap:8px;">
+                <i data-lucide="archive" style="width:16px;height:16px"></i>
+                View Archive
+              </a>
+            </div>
+          </div>
+          <div class="live-cta-right" id="ldcPreview">
+            <div class="live-cta-preview">
+              <div class="lcp-topbar">
+                <span class="lcp-badge"><span class="live-cta-dot" style="width:6px;height:6px;"></span>LIVE</span>
+                <span style="font-size:11px;color:#7d8590;font-family:monospace">Session ID-8842</span>
+              </div>
+              <div class="lcp-msgs" id="ldcMsgs">
+                <div class="lcp-msg lcp-scammer"><span class="lcp-who">SCAMMER</span><span>"Your tax refund of &#8377;50,000 will expire immediately..."</span></div>
+                <div class="lcp-msg lcp-ai"><span class="lcp-who" style="color:#3ddc84">KARMA AI</span><span>"Oh dear, let me find my glasses first, beta..."</span></div>
+                <div class="lcp-msg lcp-scammer"><span class="lcp-who">SCAMMER</span><span>"Madam please focus! Do you have your PAN card?"</span></div>
+                <div class="lcp-msg lcp-ai lcp-typing"><span class="lcp-who" style="color:#3ddc84">KARMA AI</span><span class="lcp-dots"><span></span><span></span><span></span></span></div>
+              </div>
+              <div class="lcp-waveform">
+                <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <script>
+      (function(){
+        // Particle canvas
+        const canvas = document.getElementById('ldcParticles');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        function resize(){ canvas.width=canvas.offsetWidth; canvas.height=canvas.offsetHeight; }
+        resize(); window.addEventListener('resize', resize);
+        const particles = Array.from({length:40},()=>({
+          x:Math.random()*canvas.width, y:Math.random()*canvas.height,
+          r:Math.random()*1.5+0.5, vx:(Math.random()-0.5)*0.3, vy:(Math.random()-0.5)*0.3,
+          o:Math.random()*0.5+0.1
+        }));
+        function draw(){
+          ctx.clearRect(0,0,canvas.width,canvas.height);
+          particles.forEach(p=>{
+            p.x+=p.vx; p.y+=p.vy;
+            if(p.x<0)p.x=canvas.width; if(p.x>canvas.width)p.x=0;
+            if(p.y<0)p.y=canvas.height; if(p.y>canvas.height)p.y=0;
+            ctx.beginPath();
+            ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+            ctx.fillStyle=`rgba(61,220,132,${p.o})`;
+            ctx.fill();
+          });
+          // Draw faint connection lines
+          particles.forEach((a,i)=>{ particles.slice(i+1).forEach(b=>{
+            const d=Math.hypot(a.x-b.x,a.y-b.y);
+            if(d<80){
+              ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y);
+              ctx.strokeStyle=`rgba(61,220,132,${0.08*(1-d/80)})`; ctx.lineWidth=0.6; ctx.stroke();
             }
-        });
-
-        audioContext = new (window.AudioContext || window.webkitAudioContext)({
-            sampleRate: SAMPLE_RATE
-        });
-
-        sourceNode = audioContext.createMediaStreamSource(mediaStream);
-        scriptProcessor = audioContext.createScriptProcessor(4096, 1, 1);
-
-        scriptProcessor.onaudioprocess = (e) => {
-            if (isRecording) {
-                const data = e.inputBuffer.getChannelData(0);
-                audioChunks.push(new Float32Array(data));
-            }
-        };
-
-        sourceNode.connect(scriptProcessor);
-        scriptProcessor.connect(audioContext.destination);
-
-        return true;
-    } catch (err) {
-        console.error('Mic init failed:', err);
-        addSystemMsg('Microphone access denied. Please allow mic access and try again.');
-        return false;
-    }
-}
-
-function startRecording() {
-    if (isPlaying) return; // Don't record while dadi is speaking
-    audioChunks = [];
-    isRecording = true;
-    micBtn.classList.add('recording');
-    micHint.textContent = 'Recording... release to send';
-    setStatus('recording', 'Recording');
-}
-
-function stopRecording() {
-    if (!isRecording) return;
-    isRecording = false;
-    micBtn.classList.remove('recording');
-    micHint.textContent = 'Processing...';
-    setStatus('processing', 'Processing');
-
-    // Minimum audio check (~0.3 seconds)
-    const totalSamples = audioChunks.reduce((acc, c) => acc + c.length, 0);
-    if (totalSamples < SAMPLE_RATE * 0.3) {
-        micHint.textContent = 'Too short! Hold longer to talk';
-        setStatus('connected', 'In Call');
-        return;
-    }
-
-    // Encode and send
-    const wavBlob = encodeWAV(audioChunks, SAMPLE_RATE);
-    const reader = new FileReader();
-    reader.onloadend = () => {
-        const base64 = reader.result.split(',')[1];
-        socket.emit('audio_data', { audio: base64, format: 'wav' });
-    };
-    reader.readAsDataURL(wavBlob);
-}
-
-// =====================================================================
-//  Audio playback
-// =====================================================================
-function playAudio(base64Audio) {
-    const bytes = Uint8Array.from(atob(base64Audio), c => c.charCodeAt(0));
-    const blob = new Blob([bytes], { type: 'audio/wav' });
-    const url = URL.createObjectURL(blob);
-
-    isPlaying = true;
-    micBtn.disabled = true;
-    setStatus('speaking', 'Dadi Speaking');
-    micHint.textContent = 'Dadi is speaking...';
-
-    audioPlayer.src = url;
-    audioPlayer.play().catch(err => {
-        console.error('Playback error:', err);
-        isPlaying = false;
-        micBtn.disabled = false;
-    });
-
-    audioPlayer.onended = () => {
-        isPlaying = false;
-        micBtn.disabled = false;
-        URL.revokeObjectURL(url);
-        setStatus('connected', 'In Call');
-        micHint.textContent = 'Hold the mic button to talk';
-    };
-}
-
-// =====================================================================
-//  Socket.IO connection
-// =====================================================================
-function startCall() {
-    socket = io();
-
-    socket.on('connect', () => {
-        setStatus('connected', 'Connected');
-        addSystemMsg('Call connected! Dadi is picking up...');
-        startArea.classList.add('hidden');
-        micArea.classList.add('visible');
-    });
-
-    socket.on('audio_response', (data) => {
-        hideProcessing();
-        if (data.type === 'greeting') {
-            addMessage('assistant', data.text);
+          });});
+          requestAnimationFrame(draw);
         }
-        playAudio(data.audio);
-    });
+        draw();
 
-    socket.on('transcript', (data) => {
-        hideProcessing();
-        addMessage(data.role, data.text);
-    });
-
-    socket.on('processing', (data) => {
-        showProcessing(data.stage);
-    });
-
-    socket.on('error', (data) => {
-        hideProcessing();
-        addSystemMsg('Error: ' + data.message);
-        setStatus('connected', 'In Call');
-        micBtn.disabled = false;
-        micHint.textContent = 'Hold the mic button to talk';
-    });
-
-    socket.on('call_ended', (data) => {
-        hideProcessing();
-        addSystemMsg(data.message);
-        cleanupCall();
-    });
-
-    socket.on('disconnect', () => {
-        addSystemMsg('Disconnected from server');
-        cleanupCall();
-    });
-
-    // Init mic after socket connects
-    socket.on('connect', async () => {
-        const ok = await initMic();
-        if (ok) {
-            micBtn.disabled = false;
+        // GSAP scroll animation
+        if(window.gsap && window.ScrollTrigger){
+          gsap.registerPlugin(ScrollTrigger);
+          gsap.from('#ldcBadge',{opacity:0,y:20,duration:0.5,scrollTrigger:{trigger:'#ldcCard',start:'top 80%'}});
+          gsap.from('#ldcTitle',{opacity:0,y:30,duration:0.6,delay:0.1,scrollTrigger:{trigger:'#ldcCard',start:'top 80%'}});
+          gsap.from('#ldcDesc',{opacity:0,y:20,duration:0.5,delay:0.2,scrollTrigger:{trigger:'#ldcCard',start:'top 80%'}});
+          gsap.from('#ldcActions',{opacity:0,y:20,duration:0.5,delay:0.3,scrollTrigger:{trigger:'#ldcCard',start:'top 80%'}});
+          gsap.from('#ldcPreview',{opacity:0,x:40,duration:0.7,delay:0.15,scrollTrigger:{trigger:'#ldcCard',start:'top 80%'}});
         }
-    });
-}
 
-function endCall() {
-    if (socket) {
-        socket.emit('end_call');
-    }
-    cleanupCall();
-}
+        // Cycle preview messages
+        const extraMsgs = [
+          {cls:'lcp-scammer',who:'SCAMMER',txt:'"Give me the numbers on the back of the gift card!"'},
+          {cls:'lcp-ai',who:'KARMA AI',txt:'"Oh beta, the card is so small. Let me put on my second pair of glasses..."'},
+          {cls:'lcp-scammer',who:'SCAMMER',txt:'"Madam I do NOT have all day!"'},
+        ];
+        let mIdx=0;
+        setInterval(()=>{
+          const feed = document.getElementById('ldcMsgs');
+          if(!feed) return;
+          const m=extraMsgs[mIdx%extraMsgs.length]; mIdx++;
+          const d=document.createElement('div');
+          d.className='lcp-msg '+m.cls;
+          d.style.opacity='0'; d.style.transform='translateY(8px)';
+          d.style.transition='all 0.4s ease';
+          d.innerHTML=`<span class="lcp-who" ${m.cls==='lcp-ai'?'style="color:#3ddc84"':''}>${m.who}</span><span>${m.txt}</span>`;
+          feed.appendChild(d);
+          // Force reflow then fade in
+          requestAnimationFrame(()=>requestAnimationFrame(()=>{ d.style.opacity='1'; d.style.transform='translateY(0)'; }));
+          // Remove oldest if too many
+          while(feed.children.length>5) feed.removeChild(feed.firstChild);
+          feed.scrollTop=feed.scrollHeight;
+        }, 3500);
+      })();
+      </script>
+    </section>
 
-function cleanupCall() {
-    isRecording = false;
-    isPlaying = false;
+    <!-- Features Section -->
+    <section class="section features" id="features">
+      <div class="section-wipe"></div>
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag"><i data-lucide="sparkles" style="width:14px;height:14px"></i> Features</span>
+          <h2 class="section-title">Why <span class="highlight">Karma</span> Works</h2>
+          <p class="section-desc">Built with cutting-edge technology for maximum impact</p>
+        </div>
 
-    if (audioContext && audioContext.state !== 'closed') {
-        audioContext.close().catch(() => {});
-    }
-    if (mediaStream) {
-        mediaStream.getTracks().forEach(t => t.stop());
-    }
-    if (socket) {
-        socket.disconnect();
-        socket = null;
-    }
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i data-lucide="brain" style="width:28px;height:28px"></i>
+            </div>
+            <h3>Advanced AI Engine</h3>
+            <p>Powered by latest language models trained to mimic realistic human confusion, tangents, and elderly speech patterns.</p>
+          </div>
 
-    audioContext = null;
-    mediaStream = null;
-    sourceNode = null;
-    scriptProcessor = null;
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i data-lucide="message-square-text" style="width:28px;height:28px"></i>
+            </div>
+            <h3>Smart Responses</h3>
+            <p>Trained on thousands of real conversations to keep scammers engaged with believable confusion and stories.</p>
+          </div>
 
-    micArea.classList.remove('visible');
-    startArea.classList.remove('hidden');
-    micBtn.disabled = true;
-    micBtn.classList.remove('recording');
-    setStatus('idle', 'Disconnected');
-}
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i data-lucide="hourglass" style="width:28px;height:28px"></i>
+            </div>
+            <h3>Maximum Time Waste</h3>
+            <p>Average call duration of 45 minutes. Every minute with Granny is a minute they can't scam real victims.</p>
+          </div>
 
-// =====================================================================
-//  Event listeners
-// =====================================================================
-startBtn.addEventListener('click', startCall);
-endBtn.addEventListener('click', endCall);
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i data-lucide="bar-chart-big" style="width:28px;height:28px"></i>
+            </div>
+            <h3>Data Intelligence</h3>
+            <p>Collects phone numbers, scripts, and tactics. Shares intelligence with law enforcement to shut down operations.</p>
+          </div>
 
-// Push-to-talk: hold to record, release to send
-micBtn.addEventListener('mousedown', (e) => {
-    e.preventDefault();
-    startRecording();
-});
-micBtn.addEventListener('mouseup', (e) => {
-    e.preventDefault();
-    stopRecording();
-});
-micBtn.addEventListener('mouseleave', (e) => {
-    if (isRecording) stopRecording();
-});
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i data-lucide="shield-check" style="width:28px;height:28px"></i>
+            </div>
+            <h3>Zero Risk</h3>
+            <p>No real person exposed to threats. No personal information shared. Just AI wasting scammers' time safely.</p>
+          </div>
 
-// Touch support for mobile
-micBtn.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    startRecording();
-});
-micBtn.addEventListener('touchend', (e) => {
-    e.preventDefault();
-    stopRecording();
-});
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i data-lucide="activity" style="width:28px;height:28px"></i>
+            </div>
+            <h3>24/7 Protection</h3>
+            <p>Granny never sleeps. Round-the-clock interception of scam calls across multiple phone lines.</p>
+          </div>
+        </div>
+      </div>
+    </section>
 
-// Keyboard: hold Space to record
-document.addEventListener('keydown', (e) => {
-    if (e.code === 'Space' && !e.repeat && socket && !isPlaying && !micBtn.disabled) {
-        e.preventDefault();
-        startRecording();
-    }
-});
-document.addEventListener('keyup', (e) => {
-    if (e.code === 'Space' && isRecording) {
-        e.preventDefault();
-        stopRecording();
-    }
-});
-</script>
+    <!-- Before/After Section -->
+    <section class="section comparison-section" id="comparison">
+      <div class="section-wipe"></div>
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag"><i data-lucide="git-compare" style="width:14px;height:14px"></i> Impact</span>
+          <h2 class="section-title">Before & After <span class="highlight">Karma</span></h2>
+          <p class="section-desc">See the difference Karma makes in fighting scams</p>
+        </div>
 
-</body>
+        <div class="comparison-container">
+          <div class="comparison-card comparison-before">
+            <div class="comparison-badge badge-before">
+              <i data-lucide="shield-off" style="width:18px;height:18px"></i>
+              Without Karma
+            </div>
+            <div class="comparison-items">
+              <div class="comparison-item item-bad">
+                <i data-lucide="x-circle" style="width:20px;height:20px"></i>
+                <div>
+                  <strong>Victim loses ₹2,00,000+</strong>
+                  <p>Average scam loss per victim in India</p>
+                </div>
+              </div>
+              <div class="comparison-item item-bad">
+                <i data-lucide="x-circle" style="width:20px;height:20px"></i>
+                <div>
+                  <strong>Scammer moves to next victim</strong>
+                  <p>Call ends in under 5 minutes</p>
+                </div>
+              </div>
+              <div class="comparison-item item-bad">
+                <i data-lucide="x-circle" style="width:20px;height:20px"></i>
+                <div>
+                  <strong>No data collected</strong>
+                  <p>Scammer identity remains unknown</p>
+                </div>
+              </div>
+              <div class="comparison-item item-bad">
+                <i data-lucide="x-circle" style="width:20px;height:20px"></i>
+                <div>
+                  <strong>Emotional trauma</strong>
+                  <p>Victims feel violated and helpless</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="comparison-divider">
+            <div class="comparison-vs">VS</div>
+          </div>
+
+          <div class="comparison-card comparison-after">
+            <div class="comparison-badge badge-after">
+              <i data-lucide="shield-check" style="width:18px;height:18px"></i>
+              With Karma
+            </div>
+            <div class="comparison-items">
+              <div class="comparison-item item-good">
+                <i data-lucide="check-circle" style="width:20px;height:20px"></i>
+                <div>
+                  <strong>₹0 lost — Scammer gets nothing</strong>
+                  <p>AI handles the call, no real victim involved</p>
+                </div>
+              </div>
+              <div class="comparison-item item-good">
+                <i data-lucide="check-circle" style="width:20px;height:20px"></i>
+                <div>
+                  <strong>45 minutes wasted</strong>
+                  <p>Every minute with Granny = fewer real victims</p>
+                </div>
+              </div>
+              <div class="comparison-item item-good">
+                <i data-lucide="check-circle" style="width:20px;height:20px"></i>
+                <div>
+                  <strong>Full scammer profile collected</strong>
+                  <p>Phone, location, tactics — shared with police</p>
+                </div>
+              </div>
+              <div class="comparison-item item-good">
+                <i data-lucide="check-circle" style="width:20px;height:20px"></i>
+                <div>
+                  <strong>Zero human risk</strong>
+                  <p>No real person is ever exposed to the scammer</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="section cta-section">
+      <div class="cta-bg-effects">
+        <div class="cta-orb cta-orb-1"></div>
+        <div class="cta-orb cta-orb-2"></div>
+      </div>
+      <div class="container">
+        <div class="cta-content">
+          <h2>Join the Fight<br/>Against <span class="highlight">Scammers</span></h2>
+          <p>Help us waste more scammers' time and protect more people across India</p>
+          <div class="cta-buttons">
+            <button class="btn-cta-primary">
+              <i data-lucide="flag" style="width:20px;height:20px"></i>
+              Report a Scammer
+            </button>
+            <button class="btn-cta-outline">
+              <i data-lucide="handshake" style="width:20px;height:20px"></i>
+              Partner with Us
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <div class="logo">
+              <div class="logo-icon">
+                <svg width="30" height="30" viewBox="0 0 36 36" fill="none">
+                  <circle cx="18" cy="18" r="16" stroke="currentColor" stroke-width="2.5" stroke-dasharray="4 3"/>
+                  <path d="M18 6V18L26 26" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                  <circle cx="18" cy="18" r="3" fill="currentColor"/>
+                </svg>
+              </div>
+              <span class="logo-text">KARMA</span>
+            </div>
+            <p>Fighting scammers, one confused conversation at a time.</p>
+            <div class="footer-socials">
+              <a href="#" aria-label="Twitter"><i data-lucide="twitter" style="width:18px;height:18px"></i></a>
+              <a href="#" aria-label="Github"><i data-lucide="github" style="width:18px;height:18px"></i></a>
+              <a href="#" aria-label="Mail"><i data-lucide="mail" style="width:18px;height:18px"></i></a>
+            </div>
+          </div>
+
+          <div class="footer-col">
+            <h4>Quick Links</h4>
+            <a href="#home">Home</a>
+            <a href="#how-it-works">How It Works</a>
+            <a href="#stats">Statistics</a>
+            <a href="#calls">Live Calls</a>
+          </div>
+
+          <div class="footer-col">
+            <h4>Contact</h4>
+            <a href="mailto:hello@karma.ai">hello@karma.ai</a>
+            <a href="#">Report Scammer</a>
+            <a href="#">Press Kit</a>
+          </div>
+
+          <div class="footer-col">
+            <h4>Legal</h4>
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Service</a>
+            <a href="#">Cookie Policy</a>
+          </div>
+        </div>
+
+        <div class="footer-bottom">
+          <p>&copy; 2026 Karma. All rights reserved. Made with ❤️ in India.</p>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Scammer Info Modal -->
+    <div class="modal-overlay" id="scammerModal">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h2>
+            <i data-lucide="file-warning" style="width:24px;height:24px"></i>
+            Scammer Intelligence Report
+          </h2>
+          <button class="modal-close" id="modalClose">
+            <i data-lucide="x" style="width:20px;height:20px"></i>
+          </button>
+        </div>
+        <div class="modal-body" id="modalBody"></div>
+      </div>
+    </div>
+
+    <!-- Scroll to Top -->
+    <button class="scroll-top" id="scrollTopBtn" aria-label="Scroll to top">
+      <i data-lucide="chevron-up" style="width:20px;height:20px"></i>
+    </button>
+
+    <script src="/static/script.js"></script>
+  </body>
 </html>

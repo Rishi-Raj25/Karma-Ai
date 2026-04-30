@@ -11,7 +11,7 @@
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-  <link rel="stylesheet" href="dashboard.css" />
+  <link rel="stylesheet" href="/static/dashboard.css" />
 </head>
 <body>
 <div class="app-shell">
@@ -75,13 +75,14 @@
         <!-- Live Session Banner -->
         <div class="live-entry-banner">
           <div class="live-entry-left">
-            <div class="live-ring"></div>
+            <script src="/static/live-calls.js"></script>
             <div class="live-entry-info">
               <span class="live-entry-tag">&#9679; LIVE SESSION ACTIVE</span>
               <span class="live-entry-sub">AI Guardian-V2 is intercepting a scam call</span>
             </div>
           </div>
           <a href="#transcriptFeed" class="live-entry-btn" onclick="document.getElementById('transcriptFeed').scrollTop=document.getElementById('transcriptFeed').scrollHeight;return false;">
+            <img src="/static/logo.png" alt="Karma AI" style="height:32px">
             <i data-lucide="eye" style="width:14px;height:14px"></i>
             Watch Live
           </a>
