@@ -27,6 +27,11 @@ load_dotenv()
 from flask import Flask, Response, jsonify, render_template, request, send_file, send_from_directory
 from flask_socketio import SocketIO, emit, join_room
 
+import sys
+import os
+# Add the current directory to sys.path so Vercel can find local modules
+sys.path.append(os.path.dirname(__file__))
+
 from conversation import ConversationManager, GREETING_TEXT
 from database import (
     create_call, end_call as db_end_call, get_active_calls, get_call,
