@@ -1,10 +1,15 @@
 {
   "version": 2,
-  "experimentalServices": {
-    "backend": {
-      "entrypoint": "backend/app.py",
-      "routePrefix": "/api",
-      "framework": "flask"
+  "builds": [
+    {
+      "src": "backend/app.py",
+      "use": "@vercel/python"
     }
-  }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "backend/app.py"
+    }
+  ]
 }

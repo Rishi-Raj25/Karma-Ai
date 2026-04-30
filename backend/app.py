@@ -45,7 +45,11 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 # App init
 # ---------------------------------------------------------------------------
-app = Flask(__name__)
+app = Flask(
+    __name__,
+    template_folder="templates",
+    static_folder="static"
+)
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "karma-ai-secret-key")
 
 socketio = SocketIO(
@@ -614,8 +618,23 @@ def call_status():
 
 @app.route("/")
 def index():
-    """Serve the web interface homepage."""
+    """Serve the homepage."""
     return render_template("index.html")
+
+@app.route("/live-calls.html")
+@app.route("/dashboard/live-calls.html")
+def live_calls():
+    return render_template("live-calls.html")
+
+@app.route("/analytics.html")
+@app.route("/dashboard/analytics.html")
+def analytics():
+    return render_template("analytics.html")
+
+@app.route("/archive.html")
+@app.route("/dashboard/archive.html")
+def archive():
+    return render_template("archive.html")
 
 
 # ===================================================================
@@ -702,13 +721,7 @@ def api_active_calls():
 #  Serve frontend dashboard static files
 # ===================================================================
 
-@app.route("/dashboard/")
-@app.route("/dashboard/<path:filename>")
-def serve_frontend(filename="index.html"):
-    """Serve frontend files using Flask's template engine."""
-    if filename.endswith(".html"):
-        return render_template(filename)
-    return send_from_directory("static", filename)
+# The /dashboard/ route is now handled by the template routes above.
 
 
 # ===================================================================

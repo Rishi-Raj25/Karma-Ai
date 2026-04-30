@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <link rel="stylesheet" href="/static/dashboard.css" />
+  <link rel="stylesheet" href="/static/css/dashboard.css" />
   <style>
     .archive-body { padding:24px; overflow-y:auto; height:calc(100% - 60px); display:flex; flex-direction:column; gap:20px; }
     .archive-stats { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
@@ -461,12 +461,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let start=0; const step=target/(duration/16);
     const int=setInterval(()=>{ start=Math.min(start+step,target); el.textContent=prefix+Math.round(start).toLocaleString()+suffix; if(start>=target) clearInterval(int); },16);
   }
-  const IS_VERCEL = !window.location.hostname.includes('localhost') && !window.location.hostname.includes('127.0.0.1');
-  const API_BASE = IS_VERCEL ? '/api' : '';
   const BACKEND_URL = window.location.origin;
 
   // Try to load real archive data from backend API
-  fetch(BACKEND_URL + API_BASE + '/api/calls?limit=50')
+  fetch(BACKEND_URL + '/api/calls?limit=50')
     .then(r => r.json())
     .then(resp => {
       const calls = resp.calls || [];
@@ -528,7 +526,7 @@ document.addEventListener('DOMContentLoaded', () => {
           div.querySelector('.archive-item-header').addEventListener('click', () => {
             if (!div.dataset.loaded) {
               div.dataset.loaded = 'true';
-              fetch(BACKEND_URL + API_BASE + '/api/calls/' + call.id + '/transcript')
+              fetch(BACKEND_URL + '/api/calls/' + call.id + '/transcript')
                 .then(r => r.json())
                 .then(detail => {
                   // Render intel
