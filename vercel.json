@@ -1,15 +1,14 @@
 {
   "version": 2,
   "experimentalServices": {
-    "frontend": {
-      "entrypoint": "frontend",
-      "routePrefix": "/",
-      "builder": "@vercel/static"
-    },
     "backend": {
       "entrypoint": "backend/app.py",
       "routePrefix": "/api",
       "framework": "flask"
     }
-  }
+  },
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/(.*)", "destination": "/frontend/$1" }
+  ]
 }
