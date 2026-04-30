@@ -6,6 +6,10 @@ from datetime import datetime, timezone
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "karma.db")
 
+# Vercel fix: Use /tmp for writeable database
+if os.environ.get("VERCEL"):
+    DB_PATH = "/tmp/karma.db"
+
 _CREATE_TABLES = """
 CREATE TABLE IF NOT EXISTS calls (
     id TEXT PRIMARY KEY,

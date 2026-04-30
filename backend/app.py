@@ -75,6 +75,11 @@ audio_store: dict[str, bytes] = {}
 mute_state: dict[str, bool] = {}
 
 RECORDINGS_DIR = os.path.join(os.path.dirname(__file__), "recordings")
+
+# Vercel fix: Use /tmp for writeable files
+if os.environ.get("VERCEL"):
+    RECORDINGS_DIR = "/tmp/recordings"
+
 os.makedirs(RECORDINGS_DIR, exist_ok=True)
 
 BASE_URL = os.getenv("BASE_URL", "http://localhost:5000")
