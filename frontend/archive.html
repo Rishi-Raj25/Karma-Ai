@@ -464,7 +464,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const BACKEND_URL = window.location.origin;
 
   // Try to load real archive data from backend API
-  fetch(BACKEND_URL + '/api/calls?limit=50')
+  fetch(BACKEND_URL + '/api/api/calls?limit=50')
     .then(r => r.json())
     .then(resp => {
       const calls = resp.calls || [];
@@ -526,7 +526,7 @@ document.addEventListener('DOMContentLoaded', () => {
           div.querySelector('.archive-item-header').addEventListener('click', () => {
             if (!div.dataset.loaded) {
               div.dataset.loaded = 'true';
-              fetch(BACKEND_URL + '/api/calls/' + call.id + '/transcript')
+              fetch(BACKEND_URL + '/api/api/calls/' + call.id + '/transcript')
                 .then(r => r.json())
                 .then(detail => {
                   // Render intel

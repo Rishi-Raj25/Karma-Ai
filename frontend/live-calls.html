@@ -169,6 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── Socket.IO Connection ───────────────────────────────
   const BACKEND_URL = window.location.origin;
   const socket = io(BACKEND_URL, {
+    path: '/api/socket.io',
     transports: ['websocket', 'polling'],
     query: { role: 'dashboard' }
   });
@@ -290,7 +291,7 @@ document.addEventListener('DOMContentLoaded', () => {
     genBtn.style.opacity = '0.7';
     lucide.createIcons();
 
-    fetch(BACKEND_URL + '/api/calls/' + activeCallSid + '/summary')
+    fetch(BACKEND_URL + '/api/api/calls/' + activeCallSid + '/summary')
       .then(r => r.json())
       .then(data => {
         genBtn.innerHTML = '<i data-lucide="check" style="width:14px;height:14px"></i> Summary Ready';

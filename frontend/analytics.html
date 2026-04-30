@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const BACKEND_URL = window.location.origin;
 
   // Try to fetch real stats from backend, fallback to demo data
-  fetch(BACKEND_URL + '/api/stats')
+  fetch(BACKEND_URL + '/api/api/stats')
     .then(r => r.json())
     .then(stats => {
       if (stats.total_calls > 0) {
