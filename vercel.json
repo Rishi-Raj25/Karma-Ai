@@ -5,10 +5,10 @@
       "entrypoint": "backend/app.py",
       "routePrefix": "/api",
       "framework": "flask"
-    },
-    "frontend": {
-      "entrypoint": "frontend/index.html",
-      "routePrefix": "/"
     }
-  }
+  },
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/(.*)", "destination": "/frontend/$1" }
+  ]
 }
