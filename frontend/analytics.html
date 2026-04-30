@@ -122,10 +122,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const int=setInterval(()=>{ start=Math.min(start+step,target); el.textContent=Math.round(start).toLocaleString()+suffix; if(start>=target) clearInterval(int); },16);
   }
 
+  const IS_VERCEL = !window.location.hostname.includes('localhost') && !window.location.hostname.includes('127.0.0.1');
+  const API_BASE = IS_VERCEL ? '/api' : '';
   const BACKEND_URL = window.location.origin;
 
   // Try to fetch real stats from backend, fallback to demo data
-  fetch(BACKEND_URL + '/api/api/stats')
+  fetch(BACKEND_URL + API_BASE + '/api/stats')
     .then(r => r.json())
     .then(stats => {
       if (stats.total_calls > 0) {
