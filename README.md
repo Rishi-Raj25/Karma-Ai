@@ -67,11 +67,7 @@ With the increasing number of scam calls, there is a need for systems that can c
 
 ## Author
 
-Rishi Raj  
-Computer Science Student with an interest in AI and data-driven technologies  
+Rishi Raj   
 
 ---
-
-## Notes
-
-This project was developed as part of a hackathon to explore practical applications of AI in addressing real-world problems.
+-> still needs a way to handle the latency better , right now im stating the ai in one number and whenever someone calls the number the ai granny picks up
